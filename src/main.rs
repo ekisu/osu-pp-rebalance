@@ -47,9 +47,10 @@ fn pp_request(cache: State<PlayerCache>, user: String) -> JsonValue {
 
 #[get("/pp_check?<user>")]
 fn pp_check(cache: State<PlayerCache>, user: String) -> JsonValue {
-    if let Some(status) = cache.check_status(user) {
-        if let CalcStatus::Pending(pos) = status {
+    if let Some(status) = cache.check_status(user.clone()) {
+        if let CalcStatus::Pending(pos, _) = status {
             let cur = cache.get_current_in_queue();
+            cache.ping(user.clone());
             json!( { "status": "pending", "pos": pos - cur } )
         } else if status == CalcStatus::Calculating {
             json!( { "status": "calculating" } )

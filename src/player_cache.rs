@@ -3,11 +3,12 @@ use std::sync::{Mutex, Arc};
 use std::sync::mpsc::{Sender, Receiver, channel};
 use std::thread;
 use std::thread::{JoinHandle};
+use std::time::{Duration, Instant};
 use super::performance_calculator::{calculate_performance, PerformanceResults};
 
 #[derive(Clone, Copy, PartialEq)]
 pub enum CalcStatus {
-    Pending(u64),
+    Pending(u64, Instant),
     Calculating,
     Done,
     Error
@@ -42,7 +43,13 @@ impl PlayerCache {
                 let player_request : String = rx_req.recv().unwrap();
                 {
                     let mut _guard = _calc.lock().unwrap();
-                    if let CalcStatus::Pending(current) = _guard[&player_request] {
+                    if let CalcStatus::Pending(current, last_ping) = _guard[&player_request] {
+                        let ten_s = Duration::from_secs(15);
+                        if last_ping.elapsed() > ten_s {
+                            _guard.insert(player_request.clone(), CalcStatus::Error);
+                            continue;
+                        }
+
                         *_current.lock().unwrap() = current; // uhh this should always happen, but idk
                     }
                     _guard.insert(player_request.clone(), CalcStatus::Calculating);
@@ -77,7 +84,7 @@ impl PlayerCache {
             if !_guard_status.contains_key(&player) || _guard_status[&player] == CalcStatus::Error {
                 let mut _last = self.last_queue.lock().unwrap();
                 *_last += 1;
-                _guard_status.insert(player.clone(), CalcStatus::Pending(*_last));
+                _guard_status.insert(player.clone(), CalcStatus::Pending(*_last, Instant::now()));
                 self.tx_request.lock().unwrap().send(player.clone());
             }
             None
@@ -91,6 +98,16 @@ impl PlayerCache {
             Some(_guard[&player])
         } else {
             None
+        }
+    }
+
+    pub fn ping(&self, player: String) {
+        let mut _guard = self.calc_status.lock().unwrap();
+
+        if _guard.contains_key(&player) {
+            if let CalcStatus::Pending(pos, _) = _guard[&player] {
+                _guard.insert(player.clone(), CalcStatus::Pending(pos, Instant::now()));
+            }
         }
     }
 
