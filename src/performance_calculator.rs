@@ -23,7 +23,7 @@ pub struct PerformanceResults {
     scores: Vec<Score>
 }
 
-static SEPARATORS : &'static str = r#"��"#; // ?
+static SEPARATORS : &'static str = r#"��║│║"#; // ?
 
 fn is_separator(c: char) -> bool {
     SEPARATORS.contains(c)
