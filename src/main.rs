@@ -27,7 +27,9 @@ fn index() -> Template {
 }
 
 #[get("/pp?<user>")]
-fn pp(cache: State<PlayerCache>, user: String) -> Template {
+fn pp(cache: State<PlayerCache>, mut user: String) -> Template {
+    user.make_ascii_lowercase();
+
     if let Some(results) = cache.get_performance(user) {
         Template::render("pp", &results)
     } else {
@@ -37,7 +39,9 @@ fn pp(cache: State<PlayerCache>, user: String) -> Template {
 }
 
 #[get("/pp_request?<user>")]
-fn pp_request(cache: State<PlayerCache>, user: String) -> JsonValue {
+fn pp_request(cache: State<PlayerCache>, mut user: String) -> JsonValue {
+    user.make_ascii_lowercase();
+
     println!("PP-request for {}", user);
     if let Some(_) = cache.calculate_request(user) {
         json!({ "status": "done" })
@@ -47,7 +51,9 @@ fn pp_request(cache: State<PlayerCache>, user: String) -> JsonValue {
 }
 
 #[get("/pp_check?<user>")]
-fn pp_check(cache: State<PlayerCache>, user: String) -> JsonValue {
+fn pp_check(cache: State<PlayerCache>, mut user: String) -> JsonValue {
+    user.make_ascii_lowercase();
+
     if let Some(status) = cache.check_status(user.clone()) {
         if let CalcStatus::Pending(pos, _) = status {
             let cur = cache.get_current_in_queue();
