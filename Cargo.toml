@@ -1,0 +1,7 @@
+[package]
+name = "osu-pp-rebalance"
+version = "0.1.0"
+authors = ["ekisu <ramonzitosdesorte@hotmail.com>"]
+edition = "2018"
+
+[dependencies]
