@@ -37,6 +37,7 @@ fn pp(cache: State<PlayerCache>, user: String) -> Template {
 
 #[get("/pp_request?<user>")]
 fn pp_request(cache: State<PlayerCache>, user: String) -> JsonValue {
+    println!("PP-request for {}", user);
     if let Some(_) = cache.calculate_request(user) {
         json!({ "status": "done" })
     } else {

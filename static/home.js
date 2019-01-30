@@ -18,6 +18,7 @@ const checkPPRequest = async (user, last_status) => {
     if (status != "done" && status != "error") {
         setTimeout(() => checkPPRequest(user, status), 2000);
     } else if (status == "done") {
+        document.getElementById("button").className = document.getElementById("button").className.replace(" is-loading", "");
         window.location.href = "/pp?user=" + encodeURIComponent(user);
     } else if (status == "error") {
         document.getElementById("button").className = document.getElementById("button").className.replace(" is-loading", "");
@@ -31,6 +32,8 @@ const requestPPCalc = async (user) => {
     console.log("status");
 
     if (status == "done") {
+        document.getElementById("button").className = document.getElementById("button").className.replace(" is-loading", "");
+        
         window.location.href = "/pp?user=" + encodeURIComponent(user);
     } else {
         console.log("pending, now waiting...");
