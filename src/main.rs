@@ -24,7 +24,6 @@ fn index() -> Template {
 #[get("/pp?<user>")]
 fn pp(user: String) -> Template {
     if let Ok(results) = calculate_performance(user) {
-        println!("{:?}", results);
         Template::render("pp", &results)
     } else {
         let context : HashMap<String, String> = HashMap::new();
