@@ -1,19 +1,23 @@
 #![feature(proc_macro_hygiene, decl_macro)]
 
 #[macro_use] extern crate rocket;
-
-#[macro_use]
-extern crate serde_derive;
+#[macro_use] extern crate rocket_contrib;
+#[macro_use] extern crate serde_derive;
 
 extern crate serde;
 
+use rocket_contrib::serve::StaticFiles;
 use rocket_contrib::templates::Template;
+use rocket_contrib::json::JsonValue;
 use std::collections::HashMap;
 
 pub mod config;
 pub mod performance_calculator;
+pub mod player_cache;
 
 use performance_calculator::calculate_performance;
+use player_cache::{PlayerCache, CalcStatus};
+use rocket::State;
 
 #[get("/")]
 fn index() -> Template {
@@ -22,8 +26,8 @@ fn index() -> Template {
 }
 
 #[get("/pp?<user>")]
-fn pp(user: String) -> Template {
-    if let Ok(results) = calculate_performance(user) {
+fn pp(cache: State<PlayerCache>, user: String) -> Template {
+    if let Some(results) = cache.get_performance(user) {
         Template::render("pp", &results)
     } else {
         let context : HashMap<String, String> = HashMap::new();
@@ -31,9 +35,39 @@ fn pp(user: String) -> Template {
     }
 }
 
+#[get("/pp_request?<user>")]
+fn pp_request(cache: State<PlayerCache>, user: String) -> JsonValue {
+    if let Some(_) = cache.calculate_request(user) {
+        json!({ "status": "done" })
+    } else {
+        json!({ "status": "accepted" })
+    }
+}
+
+#[get("/pp_check?<user>")]
+fn pp_check(cache: State<PlayerCache>, user: String) -> &'static str {
+    if let Some(status) = cache.check_status(user) {
+        if status == CalcStatus::Pending {
+            "pending"
+        } else if status == CalcStatus::Calculating {
+            "calculating"
+        } else if status == CalcStatus::Done {
+            "done"
+        } else {
+            "error"
+        }
+    } else {
+        "error"
+    }
+}
+
 fn main() {
     rocket::ignite().attach(Template::fairing())
+                    .manage(PlayerCache::new())
                     .mount("/", routes![index])
                     .mount("/", routes![pp])
+                    .mount("/", routes![pp_request])
+                    .mount("/", routes![pp_check])
+                    .mount("/static", StaticFiles::from(concat!(env!("CARGO_MANIFEST_DIR"), "/static")))
                     .launch();
 }

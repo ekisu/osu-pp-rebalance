@@ -6,7 +6,7 @@ use std::path::Path;
 use std::vec;
 //use serde::Serialize;
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 pub struct Score {
     song_name: String,
     live_pp: String,
@@ -15,7 +15,7 @@ pub struct Score {
     position_change: String
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 pub struct PerformanceResults {
     user: String,
     total_live_pp: String,

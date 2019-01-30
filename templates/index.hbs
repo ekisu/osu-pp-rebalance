@@ -3,7 +3,10 @@
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>osu! pp rebalance calculator</title>
+        
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.min.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.css">
+        <script src="/static/home.js"></script>
     </head>
     <body>
         <section class="hero is-fullheight">
@@ -11,21 +14,24 @@
                 <div class="container has-text-centered">
                     <div class="column is-6 is-offset-3">
                         <h1 class="title">osu! pp rebalance calculator</h1>
-                        <form action="/pp" method="GET">
                         <div class="box">
+                            <form onsubmit="return onFormSubmit()">
                             <div class="field is-grouped">
                                 <p class="control is-expanded">
-                                    <input class="input" type="text" name="user" placeholder="user name...">
+                                    <input class="input" type="text" id="user" name="user" placeholder="user name...">
                                 </p>
+
                                 <p class="control">
-                                    <input type="submit" class="button is-info" value="Calculate">
+                                    <input type="submit" id="button" class="button is-info" value="Calculate">
                                 </p>
                             </div>
+                            </form>
                         </div>
-                        </form>
                     </div>
                 </div>
             </div>
         </section>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.js"></script>
     </body>
 </html>
