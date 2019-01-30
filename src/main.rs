@@ -12,6 +12,7 @@ use rocket_contrib::json::JsonValue;
 use std::collections::HashMap;
 
 pub mod config;
+use config::NUM_THREADS;
 pub mod performance_calculator;
 pub mod player_cache;
 
@@ -66,7 +67,7 @@ fn pp_check(cache: State<PlayerCache>, user: String) -> JsonValue {
 
 fn main() {
     rocket::ignite().attach(Template::fairing())
-                    .manage(PlayerCache::new())
+                    .manage(PlayerCache::new(NUM_THREADS))
                     .mount("/", routes![index])
                     .mount("/", routes![pp])
                     .mount("/", routes![pp_request])

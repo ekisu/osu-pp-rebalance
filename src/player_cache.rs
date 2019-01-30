@@ -14,17 +14,59 @@ pub enum CalcStatus {
     Error
 }
 
+pub struct Worker {
+    handle: JoinHandle<()>
+}
+
+impl Worker {
+    pub fn new(calc_status: Arc<Mutex<HashMap<String, CalcStatus>>>,
+                data: Arc<Mutex<HashMap<String, PerformanceResults>>>,
+                rx_request: Arc<Mutex<Receiver<String>>>,
+                current_queue: Arc<Mutex<u64>>) -> Self {
+        let thread = thread::spawn(move || {
+            loop {
+                let player_request : String = rx_request.lock().unwrap().recv().unwrap();
+                {
+                    let mut _guard = calc_status.lock().unwrap();
+                    if let CalcStatus::Pending(current, last_ping) = _guard[&player_request] {
+                        let ten_s = Duration::from_secs(15);
+                        if last_ping.elapsed() > ten_s {
+                            _guard.insert(player_request.clone(), CalcStatus::Error);
+                            continue;
+                        }
+
+                        *current_queue.lock().unwrap() = current; // uhh this should always happen, but idk
+                    }
+                    _guard.insert(player_request.clone(), CalcStatus::Calculating);
+                }
+
+                let result = calculate_performance(player_request.clone());
+                if let Ok(perf) = result {
+                    calc_status.lock().unwrap().insert(player_request.clone(), CalcStatus::Done);
+                    data.lock().unwrap().insert(player_request.clone(), perf);
+                } else {
+                    calc_status.lock().unwrap().insert(player_request.clone(), CalcStatus::Error);
+                }
+            }
+        });
+
+        Worker {
+            handle: thread
+        }
+    }
+}
+
 pub struct PlayerCache {
     calc_status: Arc<Mutex<HashMap<String, CalcStatus>>>,
     data: Arc<Mutex<HashMap<String, PerformanceResults>>>,
     tx_request: Arc<Mutex<Sender<String>>>,
-    worker_handle: JoinHandle<()>,
+    worker_handles: Vec<Worker>,
     last_queue: Arc<Mutex<u64>>,
     current_queue: Arc<Mutex<u64>>
 }
 
 impl PlayerCache {
-    pub fn new() -> Self {
+    pub fn new(workers: usize) -> Self {
         let (tx_request, rx_req) = channel();
         let calc_status = Arc::new(Mutex::new(HashMap::new()));
         let calc_clone = calc_status.clone();
@@ -34,39 +76,12 @@ impl PlayerCache {
         let current_queue = Arc::new(Mutex::new(0u64));
         let current_clone = current_queue.clone();
 
-        let worker_handle = thread::spawn(move || {
-            let _calc = calc_status.clone();
-            let _data = data.clone();
-            let _current = current_queue.clone();
-
-            loop {
-                let player_request : String = rx_req.recv().unwrap();
-                {
-                    let mut _guard = _calc.lock().unwrap();
-                    if let CalcStatus::Pending(current, last_ping) = _guard[&player_request] {
-                        let ten_s = Duration::from_secs(15);
-                        if last_ping.elapsed() > ten_s {
-                            _guard.insert(player_request.clone(), CalcStatus::Error);
-                            continue;
-                        }
-
-                        *_current.lock().unwrap() = current; // uhh this should always happen, but idk
-                    }
-                    _guard.insert(player_request.clone(), CalcStatus::Calculating);
-                }
-
-                let result = calculate_performance(player_request.clone());
-                if let Ok(perf) = result {
-                    _calc.lock().unwrap().insert(player_request.clone(), CalcStatus::Done);
-                    _data.lock().unwrap().insert(player_request.clone(), perf);
-                } else {
-                    _calc.lock().unwrap().insert(player_request.clone(), CalcStatus::Error);
-                }
-            }
-        });
+        let rx_req_arc = Arc::new(Mutex::new(rx_req));
+        let worker_handles = (0..workers).map(|_| Worker::new(calc_status.clone(), data.clone(),
+                                                              rx_req_arc.clone(), current_queue.clone())).collect();
 
         PlayerCache {
-            worker_handle, data: data_clone, calc_status: calc_clone,
+            worker_handles, data: data_clone, calc_status: calc_clone,
             tx_request: Arc::new(Mutex::new(tx_request)),
             current_queue: current_clone,
             last_queue: last_queue
