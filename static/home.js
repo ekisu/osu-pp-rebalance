@@ -11,9 +11,9 @@ const checkPPRequest = async (user, last_status, last_queue_pos) => {
             toastr.info("In queue... (" + json["pos"] + " people ahead)");
             last_queue_pos = json["pos"];
         } else if (status == "calculating") {
-            toastr.info("Calculating new PP...");
+            toastr.info("Calculating new PP...", {timeOut: 0, extendedTimeOut: 0});
         } else if (status == "error") {
-            toastr.error("Error while calculating");
+            toastr.error("Error while calculating", {timeOut: 0, extendedTimeOut: 0});
         }
     } else {
         if (status == "pending" && last_queue_pos != json["pos"]) {
