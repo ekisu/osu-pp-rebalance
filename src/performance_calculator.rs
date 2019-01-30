@@ -4,9 +4,7 @@ use std::path::Path;
 
 pub fn calculate_performance(user: String) -> Result<String, String> {
     println!("{}", PERFORMANCE_CALCULATOR_PATH);
-    let output = Command::new("powershell")
-                           .arg("/C")
-                           .arg(DOTNET_COMMAND)
+    let output = Command::new(DOTNET_COMMAND)
                            .arg(PERFORMANCE_CALCULATOR_PATH)
                            .arg("profile")
                            .arg(user)
