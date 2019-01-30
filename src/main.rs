@@ -2,6 +2,11 @@
 
 #[macro_use] extern crate rocket;
 
+#[macro_use]
+extern crate serde_derive;
+
+extern crate serde;
+
 use rocket_contrib::templates::Template;
 use std::collections::HashMap;
 
@@ -19,10 +24,8 @@ fn index() -> Template {
 #[get("/pp?<user>")]
 fn pp(user: String) -> Template {
     if let Ok(results) = calculate_performance(user) {
-        let mut context : HashMap<String, String> = HashMap::new();
-        println!("{}", results);
-        context.insert(String::from("results"), results);
-        Template::render("pp", &context)
+        println!("{:?}", results);
+        Template::render("pp", &results)
     } else {
         let context : HashMap<String, String> = HashMap::new();
         Template::render("error", &context)

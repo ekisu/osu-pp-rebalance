@@ -6,14 +6,26 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.min.css">
     </head>
     <body>
-        <center><h1 class="title">osu! pp rebalance calculator</h1></center>
-        <form action="/pp" method="GET">
-            <center>
-                <p>
-                    <input type="text" class="input is-primary" name="user">
-                    <input type="submit" class="button is-primary" value="Calculate">
-                </p>
-            </center>
-        </form>
+        <section class="hero is-fullheight">
+            <div class="hero-body">
+                <div class="container has-text-centered">
+                    <div class="column is-6 is-offset-3">
+                        <h1 class="title">osu! pp rebalance calculator</h1>
+                        <form action="/pp" method="GET">
+                        <div class="box">
+                            <div class="field is-grouped">
+                                <p class="control is-expanded">
+                                    <input class="input" type="text" name="user" placeholder="user name...">
+                                </p>
+                                <p class="control">
+                                    <input type="submit" class="button is-info" value="Calculate">
+                                </p>
+                            </div>
+                        </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
     </body>
 </html>

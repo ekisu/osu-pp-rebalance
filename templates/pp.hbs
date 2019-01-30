@@ -4,9 +4,41 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>osu! pp rebalance calculator</title>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.min.css">
+        <style>
+            textarea {
+                font-family:Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;
+            }
+        </style>
     </head>
     <body>
-        <center><h1 class="title">Results</h1></center>
-        <textarea class="textarea">{{results}}</textarea>
+        <section class="hero is-fullheight">
+            <div class="hero-body">
+                <div class="container has-text-centered">
+                    <h1 class="title">Results</h1>
+                    {{user}}<br>
+                    {{total_live_pp}}<br>
+                    {{total_local_pp}}<br>
+
+                    <table class="table">
+                        <thead>
+                            <th>Beatmap</th>
+                            <th>Live PP</th>
+                            <th>Local PP</th>
+                            <th>PP +/-</th>
+                            <th>Position +/-</th>
+                        </thead>
+                        {{#each scores}}
+                        <tr>
+                            <td>{{song_name}}</td>
+                            <td>{{live_pp}}</td>
+                            <td>{{local_pp}}</td>
+                            <td>{{pp_change}}</td>
+                            <td>{{position_change}}</td>
+                        </tr>
+                        {{/each}}
+                    </table>
+                </div>
+            </div>
+        </section>
     </body>
 </html>
