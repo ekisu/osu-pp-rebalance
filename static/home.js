@@ -8,7 +8,7 @@ const checkPPRequest = async (user, last_status, last_queue_pos) => {
 
     if (last_status != status) {
         if (status == "pending") {
-            toastr.info("In queue... (" + json["pos"] + ")");
+            toastr.info("In queue... (" + json["pos"] + " people ahead)");
             last_queue_pos = json["pos"];
         } else if (status == "calculating") {
             toastr.info("Calculating new PP...");
@@ -17,7 +17,7 @@ const checkPPRequest = async (user, last_status, last_queue_pos) => {
         }
     } else {
         if (status == "pending" && last_queue_pos != json["pos"]) {
-            toastr.info("In queue... (" + json["pos"] + ")");
+            toastr.info("In queue... (" + json["pos"] + " people ahead)");
             last_queue_pos = json["pos"];
         }
     }
