@@ -5,3 +5,10 @@ authors = ["ekisu <ramonzitosdesorte@hotmail.com>"]
 edition = "2018"
 
 [dependencies]
+rocket = "0.4.0"
+
+[dependencies.rocket_contrib]
+version = "*"
+default-features = false
+features = ["handlebars_templates", "tera_templates"]
+
