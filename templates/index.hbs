@@ -41,5 +41,11 @@
         </section>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.js"></script>
+        {{#if user}}
+        <script>
+            document.getElementById("user").value = "{{user}}";
+            onFormSubmit();
+        </script>
+        {{/if}}
     </body>
 </html>

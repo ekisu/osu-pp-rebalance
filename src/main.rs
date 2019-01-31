@@ -19,22 +19,27 @@ pub mod player_cache;
 use performance_calculator::calculate_performance;
 use player_cache::{PlayerCache, CalcStatus, EnqueueResult};
 use rocket::State;
+use rocket::response::{Responder, Redirect};
 
-#[get("/")]
-fn index() -> Template {
-    let context : HashMap<&str, &str> = HashMap::new();
+#[get("/?<user>")]
+fn index(user: Option<String>) -> Template {
+    let mut _user = user.unwrap_or(String::new()).clone();
+    _user.make_ascii_lowercase();
+
+    let mut context : HashMap<String, String> = HashMap::new();
+    context.insert("user".to_string(), _user.clone());
+
     Template::render("index", &context)
 }
 
 #[get("/pp?<user>")]
-fn pp(cache: State<PlayerCache>, mut user: String) -> Template {
+fn pp(cache: State<PlayerCache>, mut user: String) -> Result<Template, Redirect> {
     user.make_ascii_lowercase();
 
-    if let Some(results) = cache.get_performance(user) {
-        Template::render("pp", &results)
+    if let Some(results) = cache.get_performance(user.clone()) {
+        Ok(Template::render("pp", &results))
     } else {
-        let context : HashMap<String, String> = HashMap::new();
-        Template::render("error", &context)
+        Err(Redirect::to(uri!(index: user)))
     }
 }
 
