@@ -1,0 +1,34 @@
+diff --git a/PerformanceCalculator/ProcessorCommand.cs b/PerformanceCalculator/ProcessorCommand.cs
+index e095309..616e4e2 100644
+--- a/PerformanceCalculator/ProcessorCommand.cs
++++ b/PerformanceCalculator/ProcessorCommand.cs
+@@ -31,7 +31,8 @@ public void OutputDocument(Document document)
+             // todo: make usable by other command
+             using (var writer = new StringWriter())
+             {
+-                ConsoleRenderer.RenderDocumentToText(document, new TextRenderTarget(writer));
++                var rect = new Rect(0, 0, 500, Size.Infinity);
++                ConsoleRenderer.RenderDocumentToText(document, new TextRenderTarget(writer), rect);
+
+                 var str = writer.GetStringBuilder().ToString();
+
+diff --git a/PerformanceCalculator/Profile/ProfileCommand.cs b/PerformanceCalculator/Profile/ProfileCommand.cs
+index 0a833f9..07ecb71 100644
+--- a/PerformanceCalculator/Profile/ProfileCommand.cs
++++ b/PerformanceCalculator/Profile/ProfileCommand.cs
+@@ -49,6 +49,7 @@ public override void Execute()
+             Console.WriteLine("Getting user top scores...");
+             foreach (var play in getJsonFromApi($"get_user_best?k={Key}&u={ProfileName}&m={Ruleset}&limit=100&type=username"))
+             {
++                try {
+                 string beatmapID = play.beatmap_id;
+
+                 string cachePath = Path.Combine("cache", $"{beatmapID}.osu");
+@@ -87,6 +88,7 @@ public override void Execute()
+                 };
+
+                 displayPlays.Add(thisPlay);
++                } catch (Exception e) {}
+             }
+
+             var localOrdered = displayPlays.OrderByDescending(p => p.LocalPP).ToList();
