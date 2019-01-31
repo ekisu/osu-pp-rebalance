@@ -1,3 +1,5 @@
+const stopLoadingAnimation = () => document.getElementById("button").className = document.getElementById("button").className.replace(" is-loading", "");
+
 const checkPPRequest = async (user, last_status, last_queue_pos) => {
     let resp = await fetch("/pp_check?user=" + encodeURIComponent(user));
 
@@ -25,23 +27,29 @@ const checkPPRequest = async (user, last_status, last_queue_pos) => {
     if (status != "done" && status != "error") {
         setTimeout(() => checkPPRequest(user, status, last_queue_pos), 2000);
     } else if (status == "done") {
-        document.getElementById("button").className = document.getElementById("button").className.replace(" is-loading", "");
+        stopLoadingAnimation();
         window.location.href = "/pp?user=" + encodeURIComponent(user);
     } else if (status == "error") {
-        document.getElementById("button").className = document.getElementById("button").className.replace(" is-loading", "");
+        stopLoadingAnimation();
     }
 }
 
-const requestPPCalc = async (user) => {
-    let resp = await fetch("/pp_request?user=" + encodeURIComponent(user));
+const requestPPCalc = async (user, force) => {
+    let resp = await fetch("/pp_request?user=" + encodeURIComponent(user) + "&force=" + encodeURIComponent(force));
 
-    let status = (await resp.json())["status"];
+    let json = await resp.json()
+    let status = json["status"];
     console.log("status");
 
     if (status == "done") {
-        document.getElementById("button").className = document.getElementById("button").className.replace(" is-loading", "");
+        stopLoadingAnimation();
 
         window.location.href = "/pp?user=" + encodeURIComponent(user);
+    } else if (status == "cant_force") {
+        stopLoadingAnimation();
+
+        toastr.error("Can't force recalculation for this user yet. "
+            + json["remaining"] + " seconds until force is available.", "", {timeOut: 0, extendedTimeOut: 0});
     } else {
         console.log("pending, now waiting...");
 
@@ -51,9 +59,10 @@ const requestPPCalc = async (user) => {
 
 const onFormSubmit = () => {
     let user = document.getElementById("user").value;
+    let force = document.getElementById("force").checked;
     document.getElementById("button").className += " is-loading";
 
-    requestPPCalc(user);
+    requestPPCalc(user, force);
 
     return false;
 }

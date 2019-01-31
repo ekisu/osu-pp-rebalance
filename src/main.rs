@@ -17,7 +17,7 @@ pub mod performance_calculator;
 pub mod player_cache;
 
 use performance_calculator::calculate_performance;
-use player_cache::{PlayerCache, CalcStatus};
+use player_cache::{PlayerCache, CalcStatus, EnqueueResult};
 use rocket::State;
 
 #[get("/")]
@@ -38,15 +38,16 @@ fn pp(cache: State<PlayerCache>, mut user: String) -> Template {
     }
 }
 
-#[get("/pp_request?<user>")]
-fn pp_request(cache: State<PlayerCache>, mut user: String) -> JsonValue {
+#[get("/pp_request?<user>&<force>")]
+fn pp_request(cache: State<PlayerCache>, mut user: String, force: Option<bool>) -> JsonValue {
+    let _force = force.unwrap_or(false);
     user.make_ascii_lowercase();
 
     println!("PP-request for {}", user);
-    if let Some(_) = cache.calculate_request(user) {
-        json!({ "status": "done" })
-    } else {
-        json!({ "status": "accepted" })
+    match cache.calculate_request(user, _force) {
+        EnqueueResult::AlreadyDone => json!({ "status": "done" }),
+        EnqueueResult::Enqueued => json!({ "status": "accepted" }),
+        EnqueueResult::CantForce(remaining_cooldown) => json!({ "status": "cant_force", "remaining": remaining_cooldown.as_secs() })
     }
 }
 

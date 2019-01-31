@@ -14,13 +14,20 @@ pub enum CalcStatus {
     Error
 }
 
+#[derive(Clone, Copy, PartialEq)]
+pub enum EnqueueResult {
+    AlreadyDone,
+    Enqueued,
+    CantForce(Duration)
+}
+
 pub struct Worker {
     handle: JoinHandle<()>
 }
 
 impl Worker {
     pub fn new(calc_status: Arc<Mutex<HashMap<String, CalcStatus>>>,
-                data: Arc<Mutex<HashMap<String, PerformanceResults>>>,
+                data: Arc<Mutex<HashMap<String, (PerformanceResults, Instant)>>>,
                 rx_request: Arc<Mutex<Receiver<String>>>,
                 current_queue: Arc<Mutex<u64>>) -> Self {
         let thread = thread::spawn(move || {
@@ -43,7 +50,7 @@ impl Worker {
                 let result = calculate_performance(player_request.clone());
                 if let Ok(perf) = result {
                     calc_status.lock().unwrap().insert(player_request.clone(), CalcStatus::Done);
-                    data.lock().unwrap().insert(player_request.clone(), perf);
+                    data.lock().unwrap().insert(player_request.clone(), (perf, Instant::now()));
                 } else {
                     calc_status.lock().unwrap().insert(player_request.clone(), CalcStatus::Error);
                 }
@@ -58,7 +65,7 @@ impl Worker {
 
 pub struct PlayerCache {
     calc_status: Arc<Mutex<HashMap<String, CalcStatus>>>,
-    data: Arc<Mutex<HashMap<String, PerformanceResults>>>,
+    data: Arc<Mutex<HashMap<String, (PerformanceResults, Instant)>>>,
     tx_request: Arc<Mutex<Sender<String>>>,
     worker_handles: Vec<Worker>,
     last_queue: Arc<Mutex<u64>>,
@@ -88,12 +95,36 @@ impl PlayerCache {
         }
     }
 
-    // if already calculated, Some(results), otherwise None and it's enqueued.
-    pub fn calculate_request(&self, player: String) -> Option<PerformanceResults> {
+    pub fn calculate_request(&self, player: String, force: bool) -> EnqueueResult {
         let _guard = self.data.lock().unwrap();
 
         if _guard.contains_key(&player) {
-            Some(_guard[&player].clone())
+            if !force {
+                EnqueueResult::AlreadyDone
+            } else {
+                let (_, last_updated) = _guard[&player];
+                let cooldown_time = Duration::from_secs(15 * 60);
+                let elapsed = last_updated.elapsed();
+
+                if (elapsed < cooldown_time) {
+                    EnqueueResult::CantForce(cooldown_time - elapsed)
+                } else {
+                    // copypaste ;w;
+                    let mut _guard_status = self.calc_status.lock().unwrap();
+                    if !_guard_status.contains_key(&player) 
+                       || _guard_status[&player] == CalcStatus::Error
+                       // Now we consider Done because we're forcing. Actually, we just don't want to overwrite
+                       // Pending or Calculating.
+                       || _guard_status[&player] == CalcStatus::Done {
+                        let mut _last = self.last_queue.lock().unwrap();
+                        *_last += 1;
+                        _guard_status.insert(player.clone(), CalcStatus::Pending(*_last, Instant::now()));
+                        self.tx_request.lock().unwrap().send(player.clone());
+                    }
+
+                    EnqueueResult::Enqueued
+                }
+            }
         } else {
             let mut _guard_status = self.calc_status.lock().unwrap();
             if !_guard_status.contains_key(&player) || _guard_status[&player] == CalcStatus::Error {
@@ -102,7 +133,7 @@ impl PlayerCache {
                 _guard_status.insert(player.clone(), CalcStatus::Pending(*_last, Instant::now()));
                 self.tx_request.lock().unwrap().send(player.clone());
             }
-            None
+            EnqueueResult::Enqueued
         }
     }
 
@@ -134,7 +165,8 @@ impl PlayerCache {
         let _guard = self.data.lock().unwrap();
 
         if _guard.contains_key(&player) {
-            Some(_guard[&player].clone())
+            let (perf, _) = &_guard[&player];
+            Some(perf.clone())
         } else {
             None
         }
