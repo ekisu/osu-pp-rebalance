@@ -1,10 +1,14 @@
 use std::collections::HashMap;
+use std::error::Error;
 use std::sync::{Mutex, Arc};
 use std::sync::mpsc::{Sender, Receiver, channel};
 use std::thread;
 use std::thread::{JoinHandle};
-use std::time::{Duration, Instant};
+use std::time::{Duration, Instant, SystemTime};
+use std::fs::File;
+use std::io::{BufReader, BufWriter};
 use super::performance_calculator::{calculate_performance, PerformanceResults};
+use crate::config::{RESULTS_FILE_STORAGE};
 
 #[derive(Clone, Copy, PartialEq)]
 pub enum CalcStatus {
@@ -27,7 +31,7 @@ pub struct Worker {
 
 impl Worker {
     pub fn new(calc_status: Arc<Mutex<HashMap<String, CalcStatus>>>,
-                data: Arc<Mutex<HashMap<String, (PerformanceResults, Instant)>>>,
+                data: Arc<Mutex<HashMap<String, (PerformanceResults, SystemTime)>>>,
                 rx_request: Arc<Mutex<Receiver<String>>>,
                 current_queue: Arc<Mutex<u64>>) -> Self {
         let thread = thread::spawn(move || {
@@ -50,7 +54,7 @@ impl Worker {
                 let result = calculate_performance(player_request.clone());
                 if let Ok(perf) = result {
                     calc_status.lock().unwrap().insert(player_request.clone(), CalcStatus::Done);
-                    data.lock().unwrap().insert(player_request.clone(), (perf, Instant::now()));
+                    data.lock().unwrap().insert(player_request.clone(), (perf, SystemTime::now()));
                 } else {
                     calc_status.lock().unwrap().insert(player_request.clone(), CalcStatus::Error);
                 }
@@ -65,7 +69,7 @@ impl Worker {
 
 pub struct PlayerCache {
     calc_status: Arc<Mutex<HashMap<String, CalcStatus>>>,
-    data: Arc<Mutex<HashMap<String, (PerformanceResults, Instant)>>>,
+    data: Arc<Mutex<HashMap<String, (PerformanceResults, SystemTime)>>>,
     tx_request: Arc<Mutex<Sender<String>>>,
     worker_handles: Vec<Worker>,
     last_queue: Arc<Mutex<u64>>,
@@ -73,11 +77,62 @@ pub struct PlayerCache {
 }
 
 impl PlayerCache {
-    pub fn new(workers: usize) -> Self {
+    fn load_results(results_file: &str) -> 
+        Result<HashMap<String, (PerformanceResults, SystemTime)>, Box<Error>> {
+        let file = File::open(results_file)?;
+        let reader = BufReader::new(file);
+
+        let results = serde_json::from_reader(reader)?;
+
+        Ok(results)
+    }
+
+    fn save_results(data: &HashMap<String, (PerformanceResults, SystemTime)>,
+                    results_file: &str) -> Result<(), Box<Error>> {
+            
+        let file = File::create(results_file)?;
+        let writer = BufWriter::new(file);
+
+        serde_json::to_writer(writer, data)?;
+
+        Ok(())
+    }
+
+    // what if the save location wasn't static
+    pub fn setup_save_results_handler(&self, save_location: &'static str) {
+        let data_clone = self.data.clone();
+        ctrlc::set_handler(move || {
+            let guard = data_clone.lock().unwrap();
+
+            println!("Saving results data...");
+
+            // FIXME we use a parameter to read but a global to write???
+            match PlayerCache::save_results(&*guard, save_location) {
+                Ok(_) => println!("Saved results data successfully!"),
+                Err(e) => println!("Error while saving: {}", e)
+            };
+        });
+    }
+
+    pub fn new(workers: usize, results_file: Option<&str>) -> Self {
         let (tx_request, rx_req) = channel();
         let calc_status = Arc::new(Mutex::new(HashMap::new()));
         let calc_clone = calc_status.clone();
-        let data = Arc::new(Mutex::new(HashMap::new()));
+
+        let data_hm = if let Some(_file_path) = results_file {
+            // FIXME fails silently
+            match PlayerCache::load_results(_file_path) {
+                Ok(hm) => hm,
+                Err(err) => {
+                    println!("Error while loading results.data: {}", err);
+                    HashMap::new()
+                }
+            }
+        } else {
+            HashMap::new()
+        };
+
+        let data = Arc::new(Mutex::new(data_hm));
         let data_clone = data.clone();
         let last_queue = Arc::new(Mutex::new(0u64));
         let current_queue = Arc::new(Mutex::new(0u64));
@@ -104,9 +159,14 @@ impl PlayerCache {
             } else {
                 let (_, last_updated) = _guard[&player];
                 let cooldown_time = Duration::from_secs(15 * 60);
-                let elapsed = last_updated.elapsed();
+                let elapsedResult = last_updated.elapsed();
+                let mut elapsed = Duration::from_secs(0); // bruh #1
 
-                if (elapsed < cooldown_time) {
+                // Uhh what if the time goes backwards (or whatever causes elapsed to err)?
+                // Should we allow it or not?
+                if elapsedResult.is_ok()
+                   // bruh #2
+                   && { elapsed = elapsedResult.unwrap(); elapsed } < cooldown_time {
                     EnqueueResult::CantForce(cooldown_time - elapsed)
                 } else {
                     // copypaste ;w;

@@ -3,16 +3,17 @@
 #[macro_use] extern crate rocket;
 #[macro_use] extern crate rocket_contrib;
 #[macro_use] extern crate serde_derive;
-
 extern crate serde;
+extern crate ctrlc;
 
 use rocket_contrib::serve::StaticFiles;
 use rocket_contrib::templates::Template;
 use rocket_contrib::json::JsonValue;
 use std::collections::HashMap;
+use std::sync::{Mutex, Arc};
 
 pub mod config;
-use config::NUM_THREADS;
+use config::{NUM_THREADS, RESULTS_FILE_STORAGE};
 pub mod performance_calculator;
 pub mod player_cache;
 
@@ -78,8 +79,11 @@ fn pp_check(cache: State<PlayerCache>, mut user: String) -> JsonValue {
 }
 
 fn main() {
+    let cache = PlayerCache::new(NUM_THREADS, Some(RESULTS_FILE_STORAGE));
+    cache.setup_save_results_handler(RESULTS_FILE_STORAGE);
+
     rocket::ignite().attach(Template::fairing())
-                    .manage(PlayerCache::new(NUM_THREADS))
+                    .manage(cache)
                     .mount("/", routes![index])
                     .mount("/", routes![pp])
                     .mount("/", routes![pp_request])
