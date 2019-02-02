@@ -127,7 +127,7 @@ const sendBeatmapRequest = async () => {
     if ([accPct, good, meh].every((x) => Object.is(x, NaN))) {
         toastr.error("Fill either accuracy (%) or number of 300s and 100s!");
         return false;
-    } else if (accPct !== NaN) {
+    } else if (Object.is(accPct, NaN)) {
         if (accPct < 0 || accPct > 100) {
             toastr.error("Accuracy (%) should be between 0 and 100.");
             return false;
