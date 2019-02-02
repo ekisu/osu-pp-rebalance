@@ -15,9 +15,9 @@
             <div class="hero-body">
                 <div class="container has-text-centered">
                     <h1 class="title">Results</h1>
-                    {{user}}<br>
-                    {{total_live_pp}}<br>
-                    {{total_local_pp}}<br>
+                    User: {{user}}<br>
+                    Live PP: {{format_number total_live_pp}} (including {{format_number total_bonus_pp}}pp from playcount)<br>
+                    Local PP: {{format_number total_local_pp}}<br>
 
                     <table class="table">
                         <thead>
@@ -29,11 +29,19 @@
                         </thead>
                         {{#each scores}}
                         <tr>
-                            <td>{{song_name}}</td>
-                            <td>{{live_pp}}</td>
-                            <td>{{local_pp}}</td>
-                            <td>{{pp_change}}</td>
-                            <td>{{position_change}}</td>
+                            <td>{{beatmap_id}} - {{beatmap_name}}</td>
+                            <td>{{format_number live_pp}}</td>
+                            <td>{{format_number local_pp}}</td>
+                            <td>{{format_number pp_change}}</td>
+                            {{#if (gt position_change 0)}}
+                                <td>+{{position_change}}</td>
+                            {{else}}
+                                {{#if (eq position_change 0)}}
+                                <td>-</td>
+                                {{else}}
+                                <td>{{position_change}}</td>
+                                {{/if}}
+                            {{/if}}
                         </tr>
                         {{/each}}
                     </table>

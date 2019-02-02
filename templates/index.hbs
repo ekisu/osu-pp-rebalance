@@ -7,44 +7,106 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.min.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.css">
         <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+        <link rel="stylesheet" href="/static/home.css">
         <script src="/static/home.js"></script>
     </head>
     <body>
-        <section class="hero is-fullheight">
-            <div class="hero-body">
-                <div class="container has-text-centered">
-                    <div class="column is-6 is-offset-3">
-                        <h1 class="title">osu! pp rebalance calculator</h1>
-                        <div class="box">
-                            <form onsubmit="return onFormSubmit()">
-                            <div class="field is-grouped">
-                                <p class="control is-expanded">
-                                    <input class="input" type="text" id="user" name="user" placeholder="user id (preferred) or user name...">
-                                </p>
-
-                                <p class="control">
-                                    <button type="submit" id="button" class="button is-info">Calculate</button>
-                                </p>
-                            </div>
-
-                            <label class="checkbox">
-                                <input type="checkbox" name="force" id="force">
-                                Force <abbr title="Recalculate the scores even if they're in cache. Useful if this user got a new top score.">recalculation.</abbr>
-                            </label>
-                            </form>
-                        </div>
-                        <p><b>double-check</b> your name for typos/trailing spaces, don't wait in the queue for nothing! if your name contains <b>special characters</b> ([-]/, etc), please use your id</p>
-                        <p>eg. osu.ppy.sh/users/<b>1234567</b>, input only the number</p>
+        <div class="container has-text-centered">
+            <div class="column is-8 is-offset-2">
+                <h1 class="title">osu! pp rebalance calculator</h1>
+                <div class="box">
+                    <div class="tabs is-centered">
+                        <ul>
+                            <li id="profile_tab" class="is-active"><a href="javascript:profileTab()">Profile</a></li>
+                            <li id="beatmap_tab"><a href="javascript:beatmapTab()">Beatmap</a></li>
+                        </ul>
                     </div>
+                    <form class="tab-content is-active" onsubmit="return onProfileFormSubmit()" id="profile_form">
+                        <div class="field is-grouped">
+                            <p class="control is-expanded">
+                                <input class="input" type="text" id="user" name="user" placeholder="user id (preferred) or user name...">
+                            </p>
+
+                            <p class="control">
+                                <button type="submit" id="button" class="button is-info">Calculate</button>
+                            </p>
+                        </div>
+
+                        <label class="checkbox">
+                            <input type="checkbox" name="force" id="force">
+                            Force <abbr title="Recalculate the scores even if they're in cache. Useful if this user got a new top score.">recalculation.</abbr>
+                        </label>
+                    </form>
+
+                    <form class="tab-content" onsubmit="return onBeatmapFormSubmit()" id="beatmap_form" hidden>
+                        <p class="field is-expanded">
+                            <input class="input" type="text" id="beatmap" name="beatmap" placeholder="beatmap id (preferred) or link...">
+                        </p>
+
+                        <div class="field is-horizontal">
+                            <div class="field-body">
+                                <div class="field">
+                                    <input class="input" type="text" id="acc_pct" name="acc_pct" placeholder="accuracy (%)">
+                                </div>
+                                <div class="field">
+                                    <input class="input" type="text" id="good" name="good" placeholder="100s">
+                                </div>
+                                <div class="field">
+                                    <input class="input" type="text" id="meh" name="meh" placeholder="50s">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="field is-horizontal">
+                            <div class="field-body">
+                                <div class="field">
+                                    <input class="input" type="text" id="combo" name="combo" placeholder="combo (optional)">
+                                </div>
+                                <div class="field">
+                                    <input class="input" type="text" id="misses" name="misses" placeholder="misses (optional)">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <input class="input" type="text" id="mods" name="mods" placeholder="mods (comma-separated, eg. hd,hr,dt)">
+                        </div>
+
+                        <div class="field">
+                            <button type="submit" id="button" class="button is-info is-expanded">Calculate</button>
+                        </div>
+                    </form>
                 </div>
+
+                <p><b>double-check</b> your name for typos/trailing spaces, don't wait in the queue for nothing! if your name contains <b>special characters</b> ([-]/, etc), please use your id</p>
+                <p>eg. osu.ppy.sh/users/<b>1234567</b>, input only the number</p>
             </div>
-        </section>
+        </div>
+
+        <div class="modal" id="beatmap-results">
+            <div class="modal-background"></div>
+            <div class="modal-card">
+                <header class="modal-card-head">
+                    <p class="modal-card-title">Beatmap results</p>
+                    <button class="delete" aria-label="close" onclick="javascript:hideBeatmapResults()"></button>
+                </header>
+
+                <section class="modal-card-body">
+                    <h1 class="subtitle" id="beatmap-results-name">Beatmap name</h1>
+                    
+                    <p>Accuracy: <span id="beatmap-results-accuracy"></span></p>
+                    <p>Mods: <span id="beatmap-results-mods"></span></p>
+                    <p>Combo: <span id="beatmap-results-combo"></span>/<span id="beatmap-results-max-combo"></span>x</p>
+                    <p><b>PP:</b> <span id="beatmap-results-pp"></span>pp</p>
+                </section>
+            </div>
+        </div>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.js"></script>
         {{#if user}}
         <script>
             document.getElementById("user").value = "{{user}}";
-            onFormSubmit();
+            onProfileFormSubmit();
         </script>
         {{/if}}
     </body>

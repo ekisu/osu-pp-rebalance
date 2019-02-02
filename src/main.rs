@@ -3,21 +3,23 @@
 #[macro_use] extern crate rocket;
 #[macro_use] extern crate rocket_contrib;
 #[macro_use] extern crate serde_derive;
+#[macro_use] extern crate handlebars;
 extern crate serde;
 extern crate ctrlc;
 
 use rocket_contrib::serve::StaticFiles;
 use rocket_contrib::templates::Template;
-use rocket_contrib::json::JsonValue;
+use rocket_contrib::json::{JsonValue, Json};
 use std::collections::HashMap;
 use std::sync::{Mutex, Arc};
 
 pub mod config;
-use config::{NUM_THREADS, RESULTS_FILE_STORAGE};
+use config::{NUM_THREADS, RESULTS_FILE_STORAGE, LOAD_SAVE_RESULTS};
 pub mod performance_calculator;
 pub mod player_cache;
+pub mod handlebars_helpers;
 
-use performance_calculator::calculate_performance;
+use performance_calculator::{calculate_performance, simulate_play, SimulationParams};
 use player_cache::{PlayerCache, CalcStatus, EnqueueResult};
 use rocket::State;
 use rocket::response::{Responder, Redirect};
@@ -78,16 +80,43 @@ fn pp_check(cache: State<PlayerCache>, mut user: String) -> JsonValue {
     }
 }
 
-fn main() {
-    let cache = PlayerCache::new(NUM_THREADS, Some(RESULTS_FILE_STORAGE));
-    cache.setup_save_results_handler(RESULTS_FILE_STORAGE);
+#[derive(Deserialize)]
+struct SimulateData {
+    beatmap_id: i64,
+    params: SimulationParams
+}
 
-    rocket::ignite().attach(Template::fairing())
-                    .manage(cache)
-                    .mount("/", routes![index])
-                    .mount("/", routes![pp])
-                    .mount("/", routes![pp_request])
-                    .mount("/", routes![pp_check])
-                    .mount("/static", StaticFiles::from(concat!(env!("CARGO_MANIFEST_DIR"), "/static")))
-                    .launch();
+#[post("/simulate", data = "<json_data>")]
+fn simulate(json_data: Json<SimulateData>) -> JsonValue {
+    let data = json_data.into_inner();
+    match simulate_play(data.beatmap_id, data.params) {
+        Ok(res) => json!( { "status": "ok", "results": res } ),
+        Err(_) => json!( { "status": "error" } )
+    }
+}
+
+fn main() {
+    let cache = PlayerCache::new(NUM_THREADS,
+        if LOAD_SAVE_RESULTS {
+            Some(RESULTS_FILE_STORAGE)
+        } else { 
+            None
+        });
+        
+    if LOAD_SAVE_RESULTS {
+        cache.setup_save_results_handler(RESULTS_FILE_STORAGE);
+    }
+
+    rocket::ignite()
+    .attach(Template::custom(|engines| {
+        engines.handlebars.register_helper("format_number", Box::new(handlebars_helpers::format_number));
+    }))
+    .manage(cache)
+    .mount("/", routes![index])
+    .mount("/", routes![pp])
+    .mount("/", routes![pp_request])
+    .mount("/", routes![pp_check])
+    .mount("/", routes![simulate])
+    .mount("/static", StaticFiles::from(concat!(env!("CARGO_MANIFEST_DIR"), "/static")))
+    .launch();
 }

@@ -9,9 +9,11 @@ rocket = "0.4.0"
 serde = "1.0"
 serde_derive = "1.0"
 serde_json = "1.0"
+handlebars = "1.0"
+reqwest = "0.9.9"
 
 [dependencies.rocket_contrib]
-version = "*"
+version = "0.4.0"
 default-features = false
 features = ["handlebars_templates", "tera_templates", "json", "serve"]
 
