@@ -150,7 +150,7 @@ const sendBeatmapRequest = async () => {
         simulation_params.misses = misses;
     }
 
-    simulation_params.mods = modsField.toUpperCase().split(",");
+    simulation_params.mods = modsField.toUpperCase().split(",").filter((v) => v == "");
     if (!simulation_params.mods.every((mod) => availableMods.lastIndexOf(mod) !== -1)) {
         toastr.error("Mods field is invalid.");
         return false;
