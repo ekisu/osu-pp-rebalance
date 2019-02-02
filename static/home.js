@@ -141,12 +141,12 @@ const sendBeatmapRequest = async () => {
     }
 
     let combo = parseInt(comboField);
-    if (combo !== NaN) {
+    if (!Object.is(combo, NaN)) {
         simulation_params.combo = combo;
     }
 
     let misses = parseInt(missesField);
-    if (misses !== NaN) {
+    if (!Object.is(misses, NaN)) {
         simulation_params.misses = misses;
     }
 
