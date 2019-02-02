@@ -89,6 +89,7 @@ struct SimulateData {
 #[post("/simulate", data = "<json_data>")]
 fn simulate(json_data: Json<SimulateData>) -> JsonValue {
     let data = json_data.into_inner();
+    println!("Simul request for {}", data.beatmap_id);
     match simulate_play(data.beatmap_id, data.params) {
         Ok(res) => json!( { "status": "ok", "results": res } ),
         Err(_) => json!( { "status": "error" } )
@@ -102,7 +103,7 @@ fn main() {
         } else { 
             None
         });
-        
+
     if LOAD_SAVE_RESULTS {
         cache.setup_save_results_handler(RESULTS_FILE_STORAGE);
     }
