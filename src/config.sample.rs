@@ -1,5 +1,5 @@
 pub static OSU_API_KEY : &'static str = "xxxxxxxxx";
-pub static PERFORMANCE_CALCULATOR_PATH : &'static str = r#"/path/to/PerformanceCalculator/bin/Debug"#;
+pub static PERFORMANCE_CALCULATOR_PATH : &'static str = r#"/path/to/PerformanceCalculator/bin/Debug/netcoreapp/PerformanceCalculator.dll"#;
 pub static DOTNET_COMMAND : &'static str = "dotnet";
 pub static NUM_THREADS : usize = 2;
 pub static LOAD_SAVE_RESULTS : bool = true;
