@@ -14,7 +14,7 @@ use std::fs::File;
 
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize)]
 pub enum Mod {
-    HD, HR, DT, NC, FL, NF, EZ, HT, SO, SD, PF
+    HD, HR, DT, NC, FL, NF, EZ, HT, SO, SD, PF, TD
 }
 
 impl Mod {
@@ -32,7 +32,8 @@ impl Mod {
             HT => "ht",
             SO => "so",
             SD => "sd",
-            PF => "pf"
+            PF => "pf",
+            TD => "td"
         }
     }
 
@@ -51,7 +52,8 @@ impl Mod {
             HT => "HT",
             SO => "SO",
             SD => "SD",
-            PF => "PF"
+            PF => "PF",
+            TD => "TD"
         }
     }
 }
