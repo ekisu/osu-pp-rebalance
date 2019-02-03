@@ -7,10 +7,50 @@ use std::process::{Command, Stdio};
 use std::path::{Path, PathBuf};
 use std::vec;
 use std::error::Error;
-use std::collections::HashMap;
+use std::collections::{HashMap, BTreeSet};
 use std::fmt;
 use std::fs::File;
 //use serde::Serialize;
+
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize)]
+pub enum Mod {
+    HD, HR, DT, NC, FL, NF, EZ, HT, SO
+}
+
+impl Mod {
+    fn to_arg(&self) -> &'static str {
+        use Mod::*;
+
+        match *self {
+            HD => "hd",
+            HR => "hr",
+            DT => "dt",
+            NC => "nc",
+            FL => "fl",
+            NF => "nf",
+            EZ => "ez",
+            HT => "ht",
+            SO => "so"
+        }
+    }
+
+    fn to_string(&self) -> &'static str {
+        use Mod::*;
+
+        // uhh
+        match *self {
+            HD => "HD",
+            HR => "HR",
+            DT => "DT",
+            NC => "NC",
+            FL => "FL",
+            NF => "NF",
+            EZ => "EZ",
+            HT => "HT",
+            SO => "SO"
+        }
+    }
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Score {
@@ -18,6 +58,8 @@ pub struct Score {
     beatmap_id: i64,
     #[serde(alias = "BeatmapName")]
     beatmap_name: String,
+    #[serde(alias = "Mods")]
+    mods: BTreeSet<Mod>, // Use BTreeSet for ordering, makes displaying them as a string easier.
     #[serde(alias = "LivePP")]
     live_pp: f64,
     #[serde(alias = "LocalPP")]
@@ -81,11 +123,6 @@ pub enum Accuracy {
     Hits { good: usize, meh: usize }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
-pub enum Mod {
-    HD, HR, DT, FL, NF, EZ, HT, SO
-}
-
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PlayInfo {
     #[serde(alias = "Accuracy")]
@@ -110,7 +147,7 @@ pub struct SimulationResults {
     #[serde(alias = "BeatmapInfo")]
     beatmap_info: String,
     #[serde(alias = "Mods")]
-    mods: Vec<Mod>,
+    mods: BTreeSet<Mod>,
     #[serde(alias = "PlayInfo")]
     play_info: PlayInfo,
     #[serde(alias = "CategoryAttribs")]
@@ -122,23 +159,6 @@ pub struct SimulationResults {
 
 fn parse_simulation_results(raw_results: String) -> Result<SimulationResults, Box<Error>> {
     Ok(serde_json::from_str(raw_results.as_str())?)
-}
-
-impl Mod {
-    fn to_arg(&self) -> &'static str {
-        use Mod::*;
-
-        match *self {
-            HD => "hd",
-            HR => "hr",
-            DT => "dt",
-            FL => "fl",
-            NF => "nf",
-            EZ => "ez",
-            HT => "ht",
-            SO => "so"
-        }
-    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

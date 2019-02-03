@@ -111,6 +111,7 @@ fn main() {
     rocket::ignite()
     .attach(Template::custom(|engines| {
         engines.handlebars.register_helper("format_number", Box::new(handlebars_helpers::format_number));
+        engines.handlebars.register_helper("has_mods", Box::new(handlebars_helpers::has_mods));
     }))
     .manage(cache)
     .mount("/", routes![index])

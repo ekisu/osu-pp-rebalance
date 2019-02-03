@@ -52,11 +52,14 @@ impl Worker {
                 }
 
                 let result = calculate_performance(player_request.clone());
-                if let Ok(perf) = result {
-                    calc_status.lock().unwrap().insert(player_request.clone(), CalcStatus::Done);
-                    data.lock().unwrap().insert(player_request.clone(), (perf, SystemTime::now()));
-                } else {
-                    calc_status.lock().unwrap().insert(player_request.clone(), CalcStatus::Error);
+                match result {
+                    Ok(perf) => {
+                        calc_status.lock().unwrap().insert(player_request.clone(), CalcStatus::Done);
+                        data.lock().unwrap().insert(player_request.clone(), (perf, SystemTime::now()));
+                    },
+                    Err(e) => {
+                        calc_status.lock().unwrap().insert(player_request.clone(), CalcStatus::Error);
+                    }
                 }
             }
         });
