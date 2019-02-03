@@ -88,7 +88,7 @@ const beatmapRegexes = [
     /^.*osu[.]ppy[.]sh\/b\/(\d+).*$/
 ];
 
-const availableMods = ["HD", "HR", "DT", "FL", "NF", "EZ", "HT", "SO"];
+const availableMods = ["HD", "HR", "DT", "NC", "FL", "NF", "EZ", "HT", "SO", "SD", "PF", "TD"];
 
 const sendBeatmapRequest = async () => {
     let beatmap = fieldValueById("beatmap");
