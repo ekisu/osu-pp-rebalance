@@ -2,7 +2,8 @@ extern crate serde;
 extern crate serde_json;
 extern crate reqwest;
 
-use crate::config::{OSU_API_KEY, PERFORMANCE_CALCULATOR_PATH, DOTNET_COMMAND, BEATMAPS_CACHE};
+use crate::config::{PERFORMANCE_CALCULATOR_PATH, DOTNET_COMMAND, BEATMAPS_CACHE};
+use crate::config_functions::api_key;
 use std::process::Command;
 use std::path::PathBuf;
 use std::error::Error;
@@ -122,7 +123,7 @@ pub fn calculate_performance(user: String) -> Result<PerformanceResults, Box<Err
                            .arg(PERFORMANCE_CALCULATOR_PATH)
                            .arg("profile")
                            .arg(user)
-                           .arg(OSU_API_KEY)
+                           .arg(api_key())
                            .arg("--json")
                            //.current_dir(Path::new(PERFORMANCE_CALCULATOR_PATH).parent().unwrap())
                            .output()?;
