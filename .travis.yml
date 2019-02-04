@@ -1,3 +1,6 @@
 language: rust
 rust:
   - nightly
+
+before_install:
+  - cp src/config.sample.rs src/config.rs
