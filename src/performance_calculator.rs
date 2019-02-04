@@ -3,9 +3,8 @@ extern crate serde_json;
 extern crate reqwest;
 
 use crate::config::{OSU_API_KEY, PERFORMANCE_CALCULATOR_PATH, DOTNET_COMMAND, BEATMAPS_CACHE};
-use std::process::{Command, Stdio};
-use std::path::{Path, PathBuf};
-use std::vec;
+use std::process::Command;
+use std::path::PathBuf;
 use std::error::Error;
 use std::collections::{HashMap, BTreeSet};
 use std::fmt;

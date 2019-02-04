@@ -8,7 +8,6 @@ use std::time::{Duration, Instant, SystemTime};
 use std::fs::File;
 use std::io::{BufReader, BufWriter};
 use super::performance_calculator::{calculate_performance, PerformanceResults};
-use crate::config::{RESULTS_FILE_STORAGE};
 
 #[derive(Clone, Copy, PartialEq)]
 pub enum CalcStatus {
@@ -57,7 +56,7 @@ impl Worker {
                         calc_status.lock().unwrap().insert(player_request.clone(), CalcStatus::Done);
                         data.lock().unwrap().insert(player_request.clone(), (perf, SystemTime::now()));
                     },
-                    Err(e) => {
+                    Err(_) => {
                         calc_status.lock().unwrap().insert(player_request.clone(), CalcStatus::Error);
                     }
                 }
@@ -162,14 +161,14 @@ impl PlayerCache {
             } else {
                 let (_, last_updated) = _guard[&player];
                 let cooldown_time = Duration::from_secs(15 * 60);
-                let elapsedResult = last_updated.elapsed();
+                let elapsed_result = last_updated.elapsed();
                 let mut elapsed = Duration::from_secs(0); // bruh #1
 
                 // Uhh what if the time goes backwards (or whatever causes elapsed to err)?
                 // Should we allow it or not?
-                if elapsedResult.is_ok()
+                if elapsed_result.is_ok()
                    // bruh #2
-                   && { elapsed = elapsedResult.unwrap(); elapsed } < cooldown_time {
+                   && { elapsed = elapsed_result.unwrap(); elapsed } < cooldown_time {
                     EnqueueResult::CantForce(cooldown_time - elapsed)
                 } else {
                     // copypaste ;w;

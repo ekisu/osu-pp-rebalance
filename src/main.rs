@@ -11,7 +11,6 @@ use rocket_contrib::serve::StaticFiles;
 use rocket_contrib::templates::Template;
 use rocket_contrib::json::{JsonValue, Json};
 use std::collections::HashMap;
-use std::sync::{Mutex, Arc};
 
 pub mod config;
 use config::{NUM_THREADS, RESULTS_FILE_STORAGE, LOAD_SAVE_RESULTS};
@@ -19,10 +18,10 @@ pub mod performance_calculator;
 pub mod player_cache;
 pub mod handlebars_helpers;
 
-use performance_calculator::{calculate_performance, simulate_play, SimulationParams};
+use performance_calculator::{simulate_play, SimulationParams};
 use player_cache::{PlayerCache, CalcStatus, EnqueueResult};
 use rocket::State;
-use rocket::response::{Responder, Redirect};
+use rocket::response::Redirect;
 
 #[get("/?<user>")]
 fn index(user: Option<String>) -> Template {
