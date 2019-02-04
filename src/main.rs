@@ -64,16 +64,15 @@ fn pp_check(cache: State<PlayerCache>, mut user: String) -> JsonValue {
     user.make_ascii_lowercase();
 
     if let Some(status) = cache.check_status(user.clone()) {
-        if let CalcStatus::Pending(pos, _) = status {
-            let cur = cache.get_current_in_queue();
-            cache.ping(user.clone());
-            json!( { "status": "pending", "pos": pos - cur } )
-        } else if status == CalcStatus::Calculating {
-            json!( { "status": "calculating" } )
-        } else if status == CalcStatus::Done {
-            json!( { "status": "done" } )
-        } else {
-            json!( { "status": "error" } )
+        match status {
+            CalcStatus::Pending(pos, _) => {
+                let cur = cache.get_current_in_queue();
+                cache.ping(user.clone());
+                json!( { "status": "pending", "pos": pos - cur } )
+            },
+            CalcStatus::Calculating => json!( { "status": "calculating" } ),
+            CalcStatus::Done => json!( { "status": "done" } ),
+            CalcStatus::Error => json!( { "status": "error" } )
         }
     } else {
         json!( { "status": "error" } )
