@@ -79,6 +79,8 @@ pub struct Score {
     beatmap_name: String,
     #[serde(alias = "Mods")]
     mods: BTreeSet<Mod>, // Use BTreeSet for ordering, makes displaying them as a string easier.
+    #[serde(alias = "Accuracy")]
+    accuracy: f64,
     #[serde(alias = "LivePP")]
     live_pp: f64,
     #[serde(alias = "LocalPP")]

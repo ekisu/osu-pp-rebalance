@@ -24,7 +24,7 @@
                         </thead>
                         {{#each scores}}
                         <tr>
-                            <td>{{beatmap_id}} - {{beatmap_name}} <b class="has-text-weight-semibold">{{#if (has_mods mods)}}+{{#each mods}}{{this}}{{/each}}{{/if}}</b></td>
+                            <td>{{beatmap_id}} - {{beatmap_name}}<b class="has-text-weight-semibold">{{#if (has_mods mods)}} +{{#each mods}}{{this}}{{/each}}{{/if}}</b> ({{format_number accuracy}}%)</td>
                             <td>{{format_number live_pp}}</td>
                             <td>{{format_number local_pp}}</td>
                             <td>{{format_number pp_change}}</td>
