@@ -9,6 +9,7 @@ use std::path::PathBuf;
 use std::error::Error;
 use std::collections::{HashMap, BTreeSet};
 use std::fmt;
+use std::fs;
 use std::fs::File;
 //use serde::Serialize;
 
@@ -193,6 +194,10 @@ pub struct SimulationParams {
 fn get_beatmap_file(beatmap_id: i64) -> Result<String, Box<Error>> {
     let mut osu_path: PathBuf = PathBuf::new();
     osu_path.push(BEATMAPS_CACHE);
+    if !osu_path.as_path().exists() {
+        fs::create_dir_all(BEATMAPS_CACHE)?;
+    }
+
     osu_path.push(format!("{}.osu", beatmap_id));
 
     if !osu_path.as_path().exists() {
