@@ -14,6 +14,7 @@ use std::collections::HashMap;
 
 pub mod config;
 use config::{NUM_THREADS, RESULTS_FILE_STORAGE, LOAD_SAVE_RESULTS};
+pub mod config_functions;
 pub mod performance_calculator;
 pub mod player_cache;
 pub mod handlebars_helpers;

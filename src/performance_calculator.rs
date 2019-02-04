@@ -2,8 +2,8 @@ extern crate serde;
 extern crate serde_json;
 extern crate reqwest;
 
-use crate::config::{PERFORMANCE_CALCULATOR_PATH, DOTNET_COMMAND, BEATMAPS_CACHE};
-use crate::config_functions::api_key;
+use crate::config::{DOTNET_COMMAND, BEATMAPS_CACHE};
+use crate::config_functions::{api_key, performance_calculator_path};
 use std::process::Command;
 use std::path::PathBuf;
 use std::error::Error;
@@ -120,7 +120,7 @@ impl Error for UnsuccessfulCommandError {}
 
 pub fn calculate_performance(user: String) -> Result<PerformanceResults, Box<Error>> {
     let output = Command::new(DOTNET_COMMAND)
-                           .arg(PERFORMANCE_CALCULATOR_PATH)
+                           .arg(performance_calculator_path())
                            .arg("profile")
                            .arg(user)
                            .arg(api_key())
@@ -208,7 +208,7 @@ fn get_beatmap_file(beatmap_id: i64) -> Result<String, Box<Error>> {
 pub fn simulate_play(beatmap_id: i64, params: SimulationParams) -> Result<SimulationResults, Box<Error>> {
     let mut cmd = Command::new(DOTNET_COMMAND);
 
-    cmd.arg(PERFORMANCE_CALCULATOR_PATH)
+    cmd.arg(performance_calculator_path())
        .arg("simulate")
        .arg("osu");
     
@@ -281,6 +281,7 @@ mod test {
 
     #[test]
     fn test_calculate_beatmaps() {
+        println!("{}", performance_calculator_path());
         use Mod::*;
 
         let data = vec![
@@ -303,8 +304,8 @@ mod test {
                     // who cares about decimal places
                     assert_eq!(result.pp.trunc(), pp);
                 },
-                Err(_) => {
-                    panic!("simulate_play failed!");
+                Err(e) => {
+                    panic!(format!("simulate_play failed! {}", e));
                 }
             }
         }
