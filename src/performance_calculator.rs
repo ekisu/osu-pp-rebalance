@@ -58,6 +58,19 @@ impl Mod {
     }
 }
 
+macro_rules! mods {
+    ( $( $mod:expr ),* ) => {
+        {
+            let mut temp_mods : BTreeSet<Mod> = BTreeSet::new();
+
+            $(
+                temp_mods.insert($mod);
+            )*
+            temp_mods
+        }
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Score {
     #[serde(alias = "BeatmapID")]
@@ -170,7 +183,7 @@ fn parse_simulation_results(raw_results: String) -> Result<SimulationResults, Bo
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SimulationParams {
     accuracy: Accuracy,
-    mods: Vec<Mod>,
+    mods: BTreeSet<Mod>,
     combo: Option<usize>,
     misses: Option<usize>
 }
@@ -231,5 +244,67 @@ pub fn simulate_play(beatmap_id: i64, params: SimulationParams) -> Result<Simula
         println!("{}", raw);
 
         Err(Box::new(UnsuccessfulCommandError))
+    }
+}
+
+// Tests
+// I think these tests should be on their own directory, but there's no way to test binaries
+// like this... So this will be here
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn mod_order() {
+        let mut mod_list = BTreeSet::new();
+        mod_list.insert(Mod::DT);
+        mod_list.insert(Mod::HR);
+        mod_list.insert(Mod::HD);
+
+        let mod_vec : Vec<_> = mod_list.into_iter().collect();
+        assert_eq!(mod_vec, [Mod::HD, Mod::HR, Mod::DT]);
+    }
+
+    // Calculate a few profiles, just to be sure everything is OK.
+    #[test]
+    fn test_calculate_profiles() {
+        let players = vec!["rafis", "mathi", "yeahbennou", "freedomdiver"];
+
+        for player in players {
+            let result = calculate_performance(player.to_string());
+
+            assert!(result.is_ok());
+        }
+    }
+
+    #[test]
+    fn test_calculate_beatmaps() {
+        use Mod::*;
+
+        let data = vec![
+            // Cookiezi's Freedom Dive
+            (129891, Accuracy::Percentage(99.83f64), mods![HD, HR], None, 898f64),
+            // Rafis' Necrofantasia
+            (1097543, Accuracy::Hits { good: 21, meh: 0 }, mods![HD, DT], Some(1627), 792f64)
+        ];
+
+        for (beatmap_id, acc, mods, combo, pp) in data {
+            let params = SimulationParams {
+                accuracy: acc,
+                mods: mods,
+                combo: combo,
+                misses: None
+            };
+
+            match simulate_play(beatmap_id, params) {
+                Ok(result) => {
+                    // who cares about decimal places
+                    assert_eq!(result.pp.trunc(), pp);
+                },
+                Err(_) => {
+                    panic!("simulate_play failed!");
+                }
+            }
+        }
     }
 }
