@@ -7,7 +7,7 @@ use std::thread::{JoinHandle};
 use std::time::{Duration, Instant, SystemTime};
 use std::fs::File;
 use std::io::{BufReader, BufWriter};
-use super::performance_calculator::{calculate_performance, PerformanceResults};
+use super::performance_calculator::{calculate_profile, ProfileResults};
 
 #[derive(Clone, Copy, PartialEq)]
 pub enum CalcStatus {
@@ -30,7 +30,7 @@ pub struct Worker {
 
 impl Worker {
     pub fn new(calc_status: Arc<Mutex<HashMap<String, CalcStatus>>>,
-                data: Arc<Mutex<HashMap<String, (PerformanceResults, SystemTime)>>>,
+                data: Arc<Mutex<HashMap<String, (ProfileResults, SystemTime)>>>,
                 rx_request: Arc<Mutex<Receiver<String>>>,
                 current_queue: Arc<Mutex<u64>>) -> Self {
         let thread = thread::spawn(move || {
@@ -50,7 +50,7 @@ impl Worker {
                     _guard.insert(player_request.clone(), CalcStatus::Calculating);
                 }
 
-                let result = calculate_performance(player_request.clone());
+                let result = calculate_profile(player_request.clone());
                 match result {
                     Ok(perf) => {
                         calc_status.lock().unwrap().insert(player_request.clone(), CalcStatus::Done);
@@ -71,7 +71,7 @@ impl Worker {
 
 pub struct PlayerCache {
     calc_status: Arc<Mutex<HashMap<String, CalcStatus>>>,
-    data: Arc<Mutex<HashMap<String, (PerformanceResults, SystemTime)>>>,
+    data: Arc<Mutex<HashMap<String, (ProfileResults, SystemTime)>>>,
     tx_request: Arc<Mutex<Sender<String>>>,
     worker_handles: Vec<Worker>,
     last_queue: Arc<Mutex<u64>>,
@@ -80,7 +80,7 @@ pub struct PlayerCache {
 
 impl PlayerCache {
     fn load_results(results_file: &str) -> 
-        Result<HashMap<String, (PerformanceResults, SystemTime)>, Box<Error>> {
+        Result<HashMap<String, (ProfileResults, SystemTime)>, Box<Error>> {
         let file = File::open(results_file)?;
         let reader = BufReader::new(file);
 
@@ -89,7 +89,7 @@ impl PlayerCache {
         Ok(results)
     }
 
-    fn save_results(data: &HashMap<String, (PerformanceResults, SystemTime)>,
+    fn save_results(data: &HashMap<String, (ProfileResults, SystemTime)>,
                     results_file: &str) -> Result<(), Box<Error>> {
             
         let file = File::create(results_file)?;
@@ -223,7 +223,7 @@ impl PlayerCache {
         *self.current_queue.lock().unwrap()
     }
 
-    pub fn get_performance(&self, player: String) -> Option<PerformanceResults> {
+    pub fn get_performance(&self, player: String) -> Option<ProfileResults> {
         let _guard = self.data.lock().unwrap();
 
         if _guard.contains_key(&player) {
