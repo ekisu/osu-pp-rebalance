@@ -1,13 +1,9 @@
-use crate::config::{DOTNET_COMMAND, BEATMAPS_CACHE};
+use crate::config::DOTNET_COMMAND;
 use crate::config_functions::{api_key, performance_calculator_path};
 use super::{Mod, UnsuccessfulCommandError};
 use std::process::Command;
-use std::path::PathBuf;
 use std::error::Error;
-use std::collections::{HashMap, BTreeSet};
-use std::fmt;
-use std::fs;
-use std::fs::File;
+use std::collections::BTreeSet;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Score {

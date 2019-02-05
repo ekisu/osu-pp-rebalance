@@ -1,11 +1,10 @@
 use crate::config::{DOTNET_COMMAND, BEATMAPS_CACHE};
-use crate::config_functions::{api_key, performance_calculator_path};
+use crate::config_functions::performance_calculator_path;
 use super::{Mod, Accuracy, UnsuccessfulCommandError};
 use std::process::Command;
 use std::path::PathBuf;
 use std::error::Error;
 use std::collections::{HashMap, BTreeSet};
-use std::fmt;
 use std::fs;
 use std::fs::File;
 
