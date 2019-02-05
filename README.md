@@ -1,5 +1,7 @@
 # osu-pp-rebalance
 
+[![Build Status](https://travis-ci.com/ekisu/osu-pp-rebalance.svg?branch=master)](https://travis-ci.com/ekisu/osu-pp-rebalance)
+
 Calculate profile/beatmap pp after the new rebalances.
 
 ## Setup
