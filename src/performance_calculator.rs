@@ -280,7 +280,9 @@ mod test {
         for player in players {
             let result = calculate_performance(player.to_string());
 
-            assert!(result.is_ok());
+            if let Err(e) = result {
+                panic!("calculate_performance for {} failed! {}", player, e);
+            }
         }
     }
 
