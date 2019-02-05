@@ -1,12 +1,15 @@
 dist: xenial
 language: rust
 rust:
-  - nightly
-
+- nightly
+cache: cargo
 before_install:
-  - wget -q https://packages.microsoft.com/config/ubuntu/16.04/packages-microsoft-prod.deb
-  - sudo dpkg -i packages-microsoft-prod.deb
-  - sudo apt-get install apt-transport-https
-  - sudo apt-get update
-  - sudo apt-get install dotnet-sdk-2.2
-  - cp src/config.sample.rs src/config.rs
+- wget -q https://packages.microsoft.com/config/ubuntu/16.04/packages-microsoft-prod.deb
+- sudo dpkg -i packages-microsoft-prod.deb
+- sudo apt-get install apt-transport-https
+- sudo apt-get update
+- sudo apt-get install dotnet-sdk-2.2
+- cp src/config.sample.rs src/config.rs
+env:
+  global:
+    secure: JREoQ7gOeOjnlv4eJyXPUs4jVomOdRkoDUkE6OCwv3HIFydYpinYRBG1Hc/8+OllJtQPhOpIU1DPb3nRVREVqaQhCgUNwHs2/h03WhFV1TWp6bhausi9x4x2FeZx/g1QGexYoFNmIVi4Ew3+/n6KkyYb9PROBXTAVWLocBrlwmJhdHMQTj3IY9D9rAeQQM+pSAodXxnTwRw+d6nmbhXG5OWsk/2u+2YYmjvGoaVpYJoIxLkZU2pTtH7xnxUn1vaOCkYPf4/gDnoEB7+LqROlKStmPhqGmejZ+bMAOQiuTOPntLZya3Nx8y4K0FACrUXoGxqRuuGpqJt/hSQaN1xetY3fj60VWJ4oRgKyF9JCFJTD7okqeZxefSxc2vLWMh5XGG5AibR8gdRwMGozKOAI2lXnYzN2K5qX4JLBZ/tbWMJneo/ssnCMyNFS6n6rotVM+zVurxUAp0zsEGTI0uOQPH+cxwJrXdDzf5zgq22SNUVJPbMVDLv6J8FHqUB0+G4Ua/sp1YoHuo56gBkBY7rt173c7Emp4ryBzU7nl265cOUuJzGcGf4rAGNRDRsrWC+kHFv2NXBn/EAwR0CnUcN7DUJvf4/Pl+tF4p190VftP21KY7RwRIcNSxbU4Tgq9m5GZAYv4bQp4RsY4yFYkjZClsv8z8Pl/CC/uweMWe1oqdM=
