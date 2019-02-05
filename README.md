@@ -6,7 +6,8 @@ Calculate profile/beatmap pp after the new rebalances.
 
 ## Setup
 
-1. Install [rustup](https://rustup.rs/). Use the *nightly* channel.
-2. Clone this [osu-tools](https://github.com/ekisu/osu-tools) fork. It won't work with the original one. Build it as normal (go to the PerformanceCalculator directory and run `dotnet build`)
-3. Copy `src/config.sample.rs` to `src/config.rs`, and change the values accordingly.
-4. Run with `cargo run`.
+1. Be sure to clone all submodules recursively. Either clone with the `--recursive` flag, or run `git submodule update --init --recursive`.
+2. Install [rustup](https://rustup.rs/). Use the *nightly* channel.
+3. Install [.NET Core SDK 2.2](https://www.microsoft.com/net/learn/get-started).
+4. Copy `src/config.sample.rs` to `src/config.rs`, and change the values accordingly.
+5. Run with `cargo run`. PerformanceCalculator will be built automatically.
