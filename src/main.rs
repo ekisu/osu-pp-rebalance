@@ -7,6 +7,7 @@
 extern crate serde;
 extern crate ctrlc;
 
+use rocket::Rocket;
 use rocket_contrib::serve::StaticFiles;
 use rocket_contrib::templates::Template;
 use rocket_contrib::json::{JsonValue, Json};
@@ -95,18 +96,7 @@ fn simulate(json_data: Json<SimulateData>) -> JsonValue {
     }
 }
 
-fn main() {
-    let cache = PlayerCache::new(NUM_THREADS,
-        if LOAD_SAVE_RESULTS {
-            Some(RESULTS_FILE_STORAGE)
-        } else { 
-            None
-        });
-
-    if LOAD_SAVE_RESULTS {
-        cache.setup_save_results_handler(RESULTS_FILE_STORAGE);
-    }
-
+fn build_rocket(cache: PlayerCache) -> Rocket {
     rocket::ignite()
     .attach(Template::custom(|engines| {
         engines.handlebars.register_helper("format_number", Box::new(handlebars_helpers::format_number));
@@ -119,5 +109,19 @@ fn main() {
     .mount("/", routes![pp_check])
     .mount("/", routes![simulate])
     .mount("/static", StaticFiles::from(concat!(env!("CARGO_MANIFEST_DIR"), "/static")))
-    .launch();
+}
+
+fn main() {
+    let cache = PlayerCache::new(NUM_THREADS,
+        if LOAD_SAVE_RESULTS {
+            Some(RESULTS_FILE_STORAGE)
+        } else { 
+            None
+        });
+
+    if LOAD_SAVE_RESULTS {
+        cache.setup_save_results_handler(RESULTS_FILE_STORAGE);
+    }
+
+    build_rocket(cache).launch();
 }
