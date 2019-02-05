@@ -134,6 +134,10 @@ pub fn calculate_performance(user: String) -> Result<PerformanceResults, Box<Err
 
         Ok(parse_results(raw)?)
     } else {
+        let raw = String::from_utf8_lossy(&output.stdout).to_string();
+
+        println!("calculate_performance failed! output: {}", raw);
+        
         Err(Box::new(UnsuccessfulCommandError))
     }
 }
@@ -248,7 +252,7 @@ pub fn simulate_play(beatmap_id: i64, params: SimulationParams) -> Result<Simula
     } else {
         let raw = String::from_utf8_lossy(&output.stdout).to_string();
 
-        println!("{}", raw);
+        println!("simulate_play failed! output: {}", raw);
 
         Err(Box::new(UnsuccessfulCommandError))
     }
