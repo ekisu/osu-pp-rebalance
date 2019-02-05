@@ -1,3 +1,5 @@
 /target
 **/*.rs.bk
 /cache
+/src/config.rs
+/Cargo.lock
