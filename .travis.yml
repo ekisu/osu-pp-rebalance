@@ -9,7 +9,6 @@ before_install:
 - sudo apt-get install apt-transport-https
 - sudo apt-get update
 - sudo apt-get install dotnet-sdk-2.2
-- cp src/config.sample.rs src/config.rs
 env:
   global:
     secure: BeLCp0TSOBz5FDS7z0HTEBiydbFl6OS9bgfOdsXShh/qIOkLDx4L8deG96kVGTw+zgFYFX+Vai8FLsqbOGckEy/KuDf0UuzsWUKzw5k+L+pu9UQlfpiGLCGJ4JL4x6Jy82o2efl/yk4b1x6JJCOm8tDKubdnXXWkcG7gkkvTvmOZI9sDWtncrlXs4ydK4HAMC/xhbweGPoKPGrPcgh/SN2znrcy0Wtz2zqPWbw1LWN8YIeKjHU4tLGYUap+nWgcwl7xV/x1q2dOX1gw+AIwNJdfSAg4gOi3H/mw80jpPq4czLk5mjY7zdTH77TtNFGfhxJRrRmEQci0wDji30ol+mIYrt94ilkuRLegKfTF9NszTLsK74yC7pkiLl3l4dUUqQJf/0t6Lo3YkajcbGokUyLpHCVgQ4wTE/j2Yjotwt3RQesD7UlVWyImfLiwhld5SwAcW/om0kcsbPiqiqbGu++Z+16rWilS3YnuzJsGVQNJjQCvASFJvvKX6YEMmaSB9ZUvXB7yy4mSvT4ua6N0sYTU+cAXCCB2hYC6q6LQovQW/C6EntG6NV0alr5DBqLGBqxsSQMFx/P3iogs4Wah9z07HjnB/77V5+uweIaXhQeXLY+fHJmJknwqDlDWL6m4AgBtAPIbgDKs37pzkNRITqg3/zt83DscP6QDc0QFnf2k=
