@@ -11,7 +11,18 @@ fn target_dir() -> PathBuf {
     }
 }
 
+fn disable_build() -> bool {
+    match env::var("DONT_BUILD_PERFORMANCE_CALCULATOR") {
+        Ok(val) => val == "1",
+        Err(_) => false
+    }
+}
+
 fn main() {
+    if disable_build() {
+        return;
+    }
+    
     let target_dir = target_dir();
 
     Command::new("dotnet").args(&["build",
