@@ -24,7 +24,7 @@ pub fn api_key() -> String {
 }
 
 pub fn dotnet_command() -> String {
-    from_env("OSU_PP_DOTNET_COMMAND", Some("dotnet".to_string()))
+    from_env("OSU_PP_CALC_DOTNET_COMMAND", Some("dotnet".to_string()))
 }
 
 pub fn num_threads() -> usize {
@@ -32,15 +32,15 @@ pub fn num_threads() -> usize {
 }
 
 pub fn load_save_results() -> bool {
-    from_env("OSU_PP_LOAD_SAVE_RESULTS", Some(false))
+    from_env("OSU_PP_CALC_LOAD_SAVE_RESULTS", Some(false))
 }
 
 pub fn results_file() -> String {
-    from_env("OSU_PP_RESULTS_FILE", Some("results.data".to_string()))
+    from_env("OSU_PP_CALC_RESULTS_FILE", Some("results.data".to_string()))
 }
 
 pub fn beatmaps_cache() -> String {
-    from_env("OSU_PP_BEATMAPS_CACHE", Some("cache".to_string()))
+    from_env("OSU_PP_CALC_BEATMAPS_CACHE", Some("cache".to_string()))
 }
 
 fn binary_dir() -> PathBuf {
