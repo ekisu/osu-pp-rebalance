@@ -79,7 +79,7 @@ pub struct PlayerCache {
 }
 
 impl PlayerCache {
-    fn load_results(results_file: &str) -> 
+    fn load_results(results_file: String) -> 
         Result<HashMap<String, (ProfileResults, SystemTime)>, Box<Error>> {
         let file = File::open(results_file)?;
         let reader = BufReader::new(file);
@@ -90,7 +90,7 @@ impl PlayerCache {
     }
 
     fn save_results(data: &HashMap<String, (ProfileResults, SystemTime)>,
-                    results_file: &str) -> Result<(), Box<Error>> {
+                    results_file: String) -> Result<(), Box<Error>> {
             
         let file = File::create(results_file)?;
         let writer = BufWriter::new(file);
@@ -101,22 +101,22 @@ impl PlayerCache {
     }
 
     // what if the save location wasn't static
-    pub fn setup_save_results_handler(&self, save_location: &'static str) {
+    pub fn setup_save_results_handler(&self, save_location: String) {
         let data_clone = self.data.clone();
         ctrlc::set_handler(move || {
             let guard = data_clone.lock().unwrap();
+            let location_clone = save_location.clone(); // uhh
 
             println!("Saving results data...");
 
-            // FIXME we use a parameter to read but a global to write???
-            match PlayerCache::save_results(&*guard, save_location) {
+            match PlayerCache::save_results(&*guard, location_clone) {
                 Ok(_) => println!("Saved results data successfully!"),
                 Err(e) => println!("Error while saving: {}", e)
             };
         });
     }
 
-    pub fn new(workers: usize, results_file: Option<&str>) -> Self {
+    pub fn new(workers: usize, results_file: Option<String>) -> Self {
         let (tx_request, rx_req) = channel();
         let calc_status = Arc::new(Mutex::new(HashMap::new()));
         let calc_clone = calc_status.clone();

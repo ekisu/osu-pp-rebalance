@@ -1,5 +1,4 @@
-use crate::config::DOTNET_COMMAND;
-use crate::config_functions::{api_key, performance_calculator_path};
+use crate::config_functions::{api_key, dotnet_command, performance_calculator_path};
 use super::{Mod, UnsuccessfulCommandError};
 use std::process::Command;
 use std::error::Error;
@@ -44,7 +43,7 @@ fn parse_profile_results(raw_results: String) -> Result<ProfileResults, Box<Erro
 }
 
 pub fn calculate_profile(user: String) -> Result<ProfileResults, Box<Error>> {
-    let output = Command::new(DOTNET_COMMAND)
+    let output = Command::new(dotnet_command())
                            .arg(performance_calculator_path())
                            .arg("profile")
                            .arg(user)

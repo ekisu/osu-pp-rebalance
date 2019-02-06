@@ -13,9 +13,8 @@ use rocket_contrib::templates::Template;
 use rocket_contrib::json::{JsonValue, Json};
 use std::collections::HashMap;
 
-pub mod config;
-use config::{NUM_THREADS, RESULTS_FILE_STORAGE, LOAD_SAVE_RESULTS};
 pub mod config_functions;
+use config_functions::{num_threads, results_file, load_save_results};
 pub mod performance_calculator;
 pub mod player_cache;
 pub mod handlebars_helpers;
@@ -112,15 +111,15 @@ fn build_rocket(cache: PlayerCache) -> Rocket {
 }
 
 fn main() {
-    let cache = PlayerCache::new(NUM_THREADS,
-        if LOAD_SAVE_RESULTS {
-            Some(RESULTS_FILE_STORAGE)
+    let cache = PlayerCache::new(num_threads(),
+        if load_save_results() {
+            Some(results_file())
         } else { 
             None
         });
 
-    if LOAD_SAVE_RESULTS {
-        cache.setup_save_results_handler(RESULTS_FILE_STORAGE);
+    if load_save_results() {
+        cache.setup_save_results_handler(results_file());
     }
 
     build_rocket(cache).launch();

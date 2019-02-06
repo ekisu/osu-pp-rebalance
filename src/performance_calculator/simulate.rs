@@ -1,5 +1,4 @@
-use crate::config::{DOTNET_COMMAND, BEATMAPS_CACHE};
-use crate::config_functions::performance_calculator_path;
+use crate::config_functions::{dotnet_command, performance_calculator_path, beatmaps_cache};
 use super::{Mod, Accuracy, UnsuccessfulCommandError};
 use std::process::Command;
 use std::path::PathBuf;
@@ -55,9 +54,9 @@ fn parse_simulation_results(raw_results: String) -> Result<SimulationResults, Bo
 
 fn get_beatmap_file(beatmap_id: i64) -> Result<String, Box<Error>> {
     let mut osu_path: PathBuf = PathBuf::new();
-    osu_path.push(BEATMAPS_CACHE);
+    osu_path.push(beatmaps_cache());
     if !osu_path.as_path().exists() {
-        fs::create_dir_all(BEATMAPS_CACHE)?;
+        fs::create_dir_all(beatmaps_cache())?;
     }
 
     osu_path.push(format!("{}.osu", beatmap_id));
@@ -73,7 +72,7 @@ fn get_beatmap_file(beatmap_id: i64) -> Result<String, Box<Error>> {
 }
 
 pub fn simulate_play(beatmap_id: i64, params: SimulationParams) -> Result<SimulationResults, Box<Error>> {
-    let mut cmd = Command::new(DOTNET_COMMAND);
+    let mut cmd = Command::new(dotnet_command());
 
     cmd.arg(performance_calculator_path())
        .arg("simulate")
