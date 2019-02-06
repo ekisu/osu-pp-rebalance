@@ -12,6 +12,6 @@ FROM microsoft/dotnet:2.2-sdk
 COPY osu-tools ./osu-tools
 COPY --from=build_calculator /app/target/release/osu-pp-rebalance ./binaries/
 
-RUN dotnet build osu-tools/PerformanceCalculator/PerformanceCalculator.csproj -o ./binaries
+RUN dotnet publish osu-tools/PerformanceCalculator/PerformanceCalculator.csproj -c Release -o /app/binaries
 
-CMD [ "./binaries/osu-pp-rebalance" ]
+CMD [ "/app/binaries/osu-pp-rebalance" ]

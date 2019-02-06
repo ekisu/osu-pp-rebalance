@@ -1,4 +1,5 @@
 use std::process::Command;
+use std::fs;
 use std::env;
 use std::path::PathBuf;
 
@@ -18,15 +19,22 @@ fn disable_build() -> bool {
     }
 }
 
+fn is_debug() -> bool {
+    env::var("PROFILE").unwrap() == "debug"
+}
+
 fn main() {
     if disable_build() {
         return;
     }
-    
+
     let target_dir = target_dir();
 
-    Command::new("dotnet").args(&["build",
-                        "osu-tools/PerformanceCalculator/PerformanceCalculator.csproj", "-o"])
-                       .arg(target_dir.to_str().unwrap())
+    Command::new("dotnet").args(&["publish",
+                        "osu-tools/PerformanceCalculator/PerformanceCalculator.csproj",
+                        "-c"])
+                       .arg(if is_debug() { "Debug" } else { "Release" })
+                       .arg("-o")
+                       .arg(fs::canonicalize(target_dir).unwrap().to_str().unwrap())
                        .status().unwrap();
 }
