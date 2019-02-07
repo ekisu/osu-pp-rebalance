@@ -1,5 +1,6 @@
 use std::env;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
+use std::fs;
 use std::str::FromStr;
 
 fn from_env<T>(key: &'static str, default: Option<T>) -> T 
@@ -20,7 +21,12 @@ where
 }
 
 pub fn api_key() -> String {
-    from_env("OSU_PP_CALC_API_KEY", None)
+    let docker_secret_file = Path::new("/run/secrets/osu_pp_calc_api_key");
+    if docker_secret_file.exists() {
+        fs::read_to_string(docker_secret_file).unwrap().trim().to_string()
+    } else {
+        from_env("OSU_PP_CALC_API_KEY", None)
+    }
 }
 
 pub fn dotnet_command() -> String {
