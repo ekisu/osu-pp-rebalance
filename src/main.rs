@@ -14,7 +14,7 @@ use rocket_contrib::json::{JsonValue, Json};
 use std::collections::HashMap;
 
 pub mod config_functions;
-use config_functions::{num_threads, results_file, load_save_results};
+use config_functions::{api_key, num_threads, results_file, load_save_results};
 pub mod performance_calculator;
 pub mod player_cache;
 pub mod handlebars_helpers;
@@ -111,6 +111,10 @@ fn build_rocket(cache: PlayerCache) -> Rocket {
 }
 
 fn main() {
+    if api_key() == "" {
+        panic!("No api key was set! Exiting!")
+    }
+
     let cache = PlayerCache::new(num_threads(),
         if load_save_results() {
             Some(results_file())
