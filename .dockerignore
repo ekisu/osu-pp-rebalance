@@ -1,0 +1,9 @@
+.git
+target
+cache
+
+# osu-tools artifacts
+**/*.dll
+**/*.pdb
+**/*.so
+**/*.a
