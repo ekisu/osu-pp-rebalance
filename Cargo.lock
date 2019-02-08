@@ -767,7 +767,7 @@ dependencies = [
 [[package]]
 name = "mt_job_queue"
 version = "0.1.0"
-source = "git+https://github.com/ekisu/mt_job_queue?rev=78ab62f#78ab62fdf99a78b84e25d5b3aa7bdbfd02ce289c"
+source = "git+https://github.com/ekisu/mt_job_queue?rev=63f150d#63f150dab8615b13c5adcf853c5a6d2457e63cfe"
 dependencies = [
  "gcollections 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "intervallum 1.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -944,7 +944,7 @@ version = "0.1.0"
 dependencies = [
  "ctrlc 3.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "handlebars 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "mt_job_queue 0.1.0 (git+https://github.com/ekisu/mt_job_queue?rev=78ab62f)",
+ "mt_job_queue 0.1.0 (git+https://github.com/ekisu/mt_job_queue?rev=63f150d)",
  "reqwest 0.9.9 (registry+https://github.com/rust-lang/crates.io-index)",
  "rocket 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "rocket_contrib 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -2038,7 +2038,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum mio 0.6.16 (registry+https://github.com/rust-lang/crates.io-index)" = "71646331f2619b1026cc302f87a2b8b648d5c6dd6937846a16cc8ce0f347f432"
 "checksum mio-extras 2.0.5 (registry+https://github.com/rust-lang/crates.io-index)" = "46e73a04c2fa6250b8d802134d56d554a9ec2922bf977777c805ea5def61ce40"
 "checksum miow 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)" = "8c1f2f3b1cf331de6896aabf6e9d55dca90356cc9960cca7eaaf408a355ae919"
-"checksum mt_job_queue 0.1.0 (git+https://github.com/ekisu/mt_job_queue?rev=78ab62f)" = "<none>"
+"checksum mt_job_queue 0.1.0 (git+https://github.com/ekisu/mt_job_queue?rev=63f150d)" = "<none>"
 "checksum native-tls 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)" = "ff8e08de0070bbf4c31f452ea2a70db092f36f6f2e4d897adf5674477d488fb2"
 "checksum net2 0.2.33 (registry+https://github.com/rust-lang/crates.io-index)" = "42550d9fb7b6684a6d404d9fa7250c2eb2646df731d1c06afc06dcee9e1bcf88"
 "checksum nix 0.11.0 (registry+https://github.com/rust-lang/crates.io-index)" = "d37e713a259ff641624b6cb20e3b12b2952313ba36b6823c0f16e6cfd9e5de17"
