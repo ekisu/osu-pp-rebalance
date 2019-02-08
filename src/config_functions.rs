@@ -2,6 +2,7 @@ use std::env;
 use std::path::{Path, PathBuf};
 use std::fs;
 use std::str::FromStr;
+use std::time::Duration;
 
 fn from_env<T>(key: &'static str, default: Option<T>) -> T 
 where
@@ -47,6 +48,10 @@ pub fn results_file() -> String {
 
 pub fn beatmaps_cache() -> String {
     from_env("OSU_PP_CALC_BEATMAPS_CACHE", Some("cache".to_string()))
+}
+
+pub fn minimal_force_interval() -> Duration {
+    Duration::from_secs(from_env("OSU_PP_CALC_FORCE_INTERVAL_SECS", Some(60*15)))
 }
 
 fn binary_dir() -> PathBuf {

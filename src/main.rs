@@ -12,15 +12,18 @@ use rocket_contrib::serve::StaticFiles;
 use rocket_contrib::templates::Template;
 use rocket_contrib::json::{JsonValue, Json};
 use std::collections::HashMap;
+use std::sync::Arc;
 
 pub mod config_functions;
-use config_functions::{api_key, num_threads, results_file, load_save_results};
+use config_functions::{api_key, num_threads, results_file, load_save_results, minimal_force_interval};
 pub mod performance_calculator;
-pub mod player_cache;
+pub mod profile_cache;
+pub mod profile_queue;
 pub mod handlebars_helpers;
 
 use performance_calculator::{simulate_play, SimulationParams};
-use player_cache::{PlayerCache, CalcStatus, EnqueueResult};
+use profile_cache::ProfileCache;
+use profile_queue::{ProfileQueue, RequestStatus};
 use rocket::State;
 use rocket::response::Redirect;
 
@@ -36,10 +39,10 @@ fn index(user: Option<String>) -> Template {
 }
 
 #[get("/pp?<user>")]
-fn pp(cache: State<PlayerCache>, mut user: String) -> Result<Template, Redirect> {
+fn pp(cache: State<Arc<ProfileCache>>, mut user: String) -> Result<Template, Redirect> {
     user.make_ascii_lowercase();
 
-    if let Some(results) = cache.get_performance(user.clone()) {
+    if let Some((results, _)) = cache.get(user.clone()) {
         Ok(Template::render("pp", &results))
     } else {
         Err(Redirect::to(uri!(index: user)))
@@ -47,32 +50,49 @@ fn pp(cache: State<PlayerCache>, mut user: String) -> Result<Template, Redirect>
 }
 
 #[get("/pp_request?<user>&<force>")]
-fn pp_request(cache: State<PlayerCache>, mut user: String, force: Option<bool>) -> JsonValue {
+fn pp_request(cache: State<Arc<ProfileCache>>, queue: State<ProfileQueue>, mut user: String, force: Option<bool>) -> JsonValue {
     let _force = force.unwrap_or(false);
     user.make_ascii_lowercase();
 
     println!("PP-request for {}", user);
-    match cache.calculate_request(user, _force) {
-        EnqueueResult::AlreadyDone => json!({ "status": "done" }),
-        EnqueueResult::Enqueued => json!({ "status": "accepted" }),
-        EnqueueResult::CantForce(remaining_cooldown) => json!({ "status": "cant_force", "remaining": remaining_cooldown.as_secs() })
+    // This logic is still a bit convoluted...
+    match cache.get(user.clone()) {
+        Some((_, time)) => {
+            if !_force {
+                return json!({ "status": "done" });
+            }
+
+            match time.elapsed() {
+                Ok(elapsed) => {
+                    if elapsed < minimal_force_interval() {
+                        return json!({
+                            "status": "cant_force",
+                            "remaining": (minimal_force_interval() - elapsed).as_secs()
+                        });
+                    }
+                }
+                Err(_) => {}
+            }
+        },
+        None => {}
     }
+
+    queue.enqueue(user);
+    json!({ "status": "accepted" })
 }
 
 #[get("/pp_check?<user>")]
-fn pp_check(cache: State<PlayerCache>, mut user: String) -> JsonValue {
+fn pp_check(queue: State<ProfileQueue>, mut user: String) -> JsonValue {
     user.make_ascii_lowercase();
 
-    if let Some(status) = cache.check_status(user.clone()) {
+    if let Some(status) = queue.status(user) {
         match status {
-            CalcStatus::Pending(pos, _) => {
-                let cur = cache.get_current_in_queue();
-                cache.ping(user.clone());
-                json!( { "status": "pending", "pos": pos - cur } )
+            RequestStatus::Pending(pos) => {
+                json!( { "status": "pending", "pos": pos } )
             },
-            CalcStatus::Calculating => json!( { "status": "calculating" } ),
-            CalcStatus::Done => json!( { "status": "done" } ),
-            CalcStatus::Error => json!( { "status": "error" } )
+            RequestStatus::Calculating => json!( { "status": "calculating" } ),
+            RequestStatus::Done => json!( { "status": "done" } ),
+            RequestStatus::Error => json!( { "status": "error" } )
         }
     } else {
         json!( { "status": "error" } )
@@ -95,13 +115,14 @@ fn simulate(json_data: Json<SimulateData>) -> JsonValue {
     }
 }
 
-fn build_rocket(cache: PlayerCache) -> Rocket {
+fn build_rocket(cache: Arc<ProfileCache>, queue: ProfileQueue) -> Rocket {
     rocket::ignite()
     .attach(Template::custom(|engines| {
         engines.handlebars.register_helper("format_number", Box::new(handlebars_helpers::format_number));
         engines.handlebars.register_helper("has_mods", Box::new(handlebars_helpers::has_mods));
     }))
     .manage(cache)
+    .manage(queue)
     .mount("/", routes![index])
     .mount("/", routes![pp])
     .mount("/", routes![pp_request])
@@ -115,16 +136,17 @@ fn main() {
         panic!("No api key was set! Exiting!")
     }
 
-    let cache = PlayerCache::new(num_threads(),
-        if load_save_results() {
+    let cache = Arc::new(ProfileCache::new(if load_save_results() {
             Some(results_file())
         } else { 
             None
-        });
+        }));
 
     if load_save_results() {
         cache.setup_save_results_handler(results_file());
     }
 
-    build_rocket(cache).launch();
+    let queue = ProfileQueue::new(cache.clone(), num_threads());
+
+    build_rocket(cache, queue).launch();
 }
