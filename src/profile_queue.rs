@@ -10,7 +10,7 @@ use super::performance_calculator::ProfileResults;
 use std::collections::{BTreeSet, HashMap};
 
 pub struct ProfileQueue {
-    calculation_errors: BTreeSet<String>,
+    calculation_errors: Arc<Mutex<BTreeSet<String>>>,
     user_job_id: Arc<Mutex<HashMap<String, usize>>>,
     job_queue: Queue<String>,
     profile_cache: Arc<ProfileCache>
@@ -26,7 +26,7 @@ pub enum RequestStatus {
 
 impl ProfileQueue {
     pub fn new(profile_cache: Arc<ProfileCache>, num_threads: usize) -> Self {
-        let calculation_errors = BTreeSet::new();
+        let calculation_errors = Arc::new(Mutex::new(BTreeSet::new()));
         let process_job = Arc::new(|user: String| {
             let opt = match calculate_profile(user.clone()) {
                 Ok(result) => Some(result),
@@ -37,11 +37,12 @@ impl ProfileQueue {
         });
 
         let job_completed_profile_cache = profile_cache.clone();
+        let job_completed_calculation_errors = calculation_errors.clone();
         let on_job_completed = Arc::new(move |(user, result): (String, Option<ProfileResults>)| {
             match result {
                 Some(profile_results) => job_completed_profile_cache.set(user, profile_results),
                 None => {
-                    //calculation_errors.insert(user);
+                    job_completed_calculation_errors.lock().unwrap().insert(user);
                 }
             }
         });
@@ -72,7 +73,7 @@ impl ProfileQueue {
                 JobState::Pending => RequestStatus::Pending(self.job_queue.position(*job_id)),
                 JobState::Acknowledged => RequestStatus::Calculating,
                 JobState::Complete => {
-                    if self.calculation_errors.contains(&user) {
+                    if self.calculation_errors.lock().unwrap().contains(&user) {
                         RequestStatus::Error
                     } else {
                         RequestStatus::Done

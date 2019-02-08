@@ -15,7 +15,7 @@ use std::collections::HashMap;
 use std::sync::Arc;
 
 pub mod config_functions;
-use config_functions::{api_key, num_threads, results_file, load_save_results};
+use config_functions::{api_key, num_threads, results_file, load_save_results, minimal_force_interval};
 pub mod performance_calculator;
 pub mod profile_cache;
 pub mod profile_queue;
@@ -42,7 +42,7 @@ fn index(user: Option<String>) -> Template {
 fn pp(cache: State<Arc<ProfileCache>>, mut user: String) -> Result<Template, Redirect> {
     user.make_ascii_lowercase();
 
-    if let Some(results) = cache.get(user.clone()) {
+    if let Some((results, _)) = cache.get(user.clone()) {
         Ok(Template::render("pp", &results))
     } else {
         Err(Redirect::to(uri!(index: user)))
@@ -55,13 +55,30 @@ fn pp_request(cache: State<Arc<ProfileCache>>, queue: State<ProfileQueue>, mut u
     user.make_ascii_lowercase();
 
     println!("PP-request for {}", user);
+    // This logic is still a bit convoluted...
     match cache.get(user.clone()) {
-        Some(_) => json!({ "status": "done" }),
-        None => {
-            queue.enqueue(user);
-            json!({ "status": "accepted" })
-        }
+        Some((_, time)) => {
+            if !_force {
+                return json!({ "status": "done" });
+            }
+
+            match time.elapsed() {
+                Ok(elapsed) => {
+                    if elapsed < minimal_force_interval() {
+                        return json!({
+                            "status": "cant_force",
+                            "remaining": (minimal_force_interval() - elapsed).as_secs()
+                        });
+                    }
+                }
+                Err(_) => {}
+            }
+        },
+        None => {}
     }
+
+    queue.enqueue(user);
+    json!({ "status": "accepted" })
 }
 
 #[get("/pp_check?<user>")]

@@ -70,12 +70,12 @@ impl ProfileCache {
         }
     }
 
-    pub fn get(&self, player: String) -> Option<ProfileResults> {
+    pub fn get(&self, player: String) -> Option<(ProfileResults, SystemTime)> {
         let _guard = self.data.lock().unwrap();
 
         if _guard.contains_key(&player) {
-            let (perf, _) = &_guard[&player];
-            Some(perf.clone())
+            let pair = &_guard[&player];
+            Some(pair.clone())
         } else {
             None
         }
