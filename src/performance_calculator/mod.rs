@@ -1,3 +1,8 @@
+//! A interface to osu-tools' PerformanceCalculator.dll
+//! 
+//! This module contains a few data structures/enums common to both
+//! profile calculation and simulation requests. Specialized functions
+//! can be found into the `profile` and `simulate` modules.
 extern crate reqwest;
 extern crate serde;
 extern crate serde_json;

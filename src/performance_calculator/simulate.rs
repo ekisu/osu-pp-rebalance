@@ -1,3 +1,7 @@
+//! A interface for PerformanceCalculator.dll's `simulate` command.
+//! 
+//! The principal function of this module is `simulate_play`, which
+//! calls into PerformanceCalculator.
 use super::{Accuracy, Mod, UnsuccessfulCommandError};
 use crate::config_functions::{beatmaps_cache, dotnet_command, performance_calculator_path};
 use std::collections::{BTreeSet, HashMap};

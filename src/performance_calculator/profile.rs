@@ -1,3 +1,7 @@
+//! A interface for PerformanceCalculator.dll's `profile` command.
+//! 
+//! The principal function of this module is `calculate_profile`, which
+//! calls into PerformanceCalculator.
 use super::{Mod, UnsuccessfulCommandError};
 use crate::config_functions::{api_key, dotnet_command, performance_calculator_path};
 use std::collections::BTreeSet;
