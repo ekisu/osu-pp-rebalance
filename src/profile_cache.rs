@@ -21,6 +21,11 @@ pub struct ProfileCache {
 
 impl ProfileCache {
     /// Load results stored in `results_file` into a HashMap.
+    /// 
+    /// # Errors
+    /// 
+    /// Will error if the `results_file` couldn't be opened, read,
+    /// or if its contents aren't a valid cache representation.
     fn load_results(
         results_file: String,
     ) -> Result<HashMap<String, (ProfileResults, SystemTime)>, Box<Error>> {
@@ -33,6 +38,10 @@ impl ProfileCache {
     }
 
     /// Save the results stored in `data` into `results_file`.
+    /// 
+    /// # Errors
+    /// 
+    /// Will error if the HashMap fails to be written to `results_file`.
     fn save_results(
         data: &HashMap<String, (ProfileResults, SystemTime)>,
         results_file: String,

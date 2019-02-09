@@ -59,13 +59,24 @@ pub struct SimulationParams {
 }
 
 /// Parses the output of PerformanceCalculator's `simulate` command (contained into
-/// `raw_results`) into a SimulationResults struct.
+/// `raw_results`) into a SimulationResults.
+/// 
+/// # Errors
+/// 
+/// Will error if the contents of `raw_results` can't be parsed into a valid
+/// `SimulationResults`.
 fn parse_simulation_results(raw_results: String) -> Result<SimulationResults, Box<Error>> {
     Ok(serde_json::from_str(raw_results.as_str())?)
 }
 
 /// Obtains the path for a beatmap's .osu file. If the beatmap isn't currently
 /// cached, downloads it and stores it into `beatmaps_cache()`.
+/// 
+/// # Errors
+/// 
+/// Will error if the folder `beatmaps_cache()` doesn't exist and can't be created;
+/// and if the beatmap identified by `beatmap_id` doesn't exist and
+/// couldn't be downloaded/saved.
 fn get_beatmap_file(beatmap_id: i64) -> Result<String, Box<Error>> {
     let mut osu_path: PathBuf = PathBuf::new();
     osu_path.push(beatmaps_cache());
@@ -86,7 +97,13 @@ fn get_beatmap_file(beatmap_id: i64) -> Result<String, Box<Error>> {
 }
 
 /// Simulate a play on `beatmap_id`, under the conditions specified by `params`, under the
-/// new PP system. Returns a SimulationResults on success, or a Error on error.
+/// new PP system. Returns a SimulationResults struct.
+/// 
+/// # Errors
+/// 
+/// Will error if the beatmap isn't cached and, for whatever reason, couldn't be downloaded;
+/// if the call to `PerformanceCalculator.dll` fails, or if the output of `PerformanceCalculator`
+/// couldn't be parsed into a `SimulationResults`.
 pub fn simulate_play(
     beatmap_id: i64,
     params: SimulationParams,

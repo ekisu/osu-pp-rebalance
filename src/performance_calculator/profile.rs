@@ -45,7 +45,11 @@ pub struct ProfileResults {
     scores: Vec<Score>,
 }
 
-/// Parses the output from PerformanceCalculator (`raw_results`) into a ProfileResults struct
+/// Parses the output from PerformanceCalculator (`raw_results`) into a ProfileResults struct.
+/// 
+/// # Errors
+/// 
+/// Will error if `raw_results` can't be parsed into a valid `ProfileResults`.
 fn parse_profile_results(raw_results: String) -> Result<ProfileResults, Box<Error>> {
     Ok(serde_json::from_str(raw_results.as_str())?)
 }
