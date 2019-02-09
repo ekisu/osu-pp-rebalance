@@ -1,22 +1,33 @@
 use std::env;
-use std::path::{Path, PathBuf};
 use std::fs;
+use std::path::{Path, PathBuf};
 use std::str::FromStr;
 use std::time::Duration;
 
-fn from_env<T>(key: &'static str, default: Option<T>) -> T 
+fn from_env<T>(key: &'static str, default: Option<T>) -> T
 where
-    T: FromStr {
+    T: FromStr,
+{
     match env::var(key) {
-        Ok(str_value) => if let Ok(val) = str_value.parse::<T>() {
-            val
-        } else {
-            panic!("from_env: key {} exists, but value couldn't be parsed!", key);
-        },
-        Err(_) => if let Some(val) = default {
-            val
-        } else {
-            panic!("from_env: key {} wasn't set and no default was supplied!", key);
+        Ok(str_value) => {
+            if let Ok(val) = str_value.parse::<T>() {
+                val
+            } else {
+                panic!(
+                    "from_env: key {} exists, but value couldn't be parsed!",
+                    key
+                );
+            }
+        }
+        Err(_) => {
+            if let Some(val) = default {
+                val
+            } else {
+                panic!(
+                    "from_env: key {} wasn't set and no default was supplied!",
+                    key
+                );
+            }
         }
     }
 }
@@ -24,7 +35,10 @@ where
 pub fn api_key() -> String {
     let docker_secret_file = Path::new("/run/secrets/osu_pp_calc_api_key");
     if docker_secret_file.exists() {
-        fs::read_to_string(docker_secret_file).unwrap().trim().to_string()
+        fs::read_to_string(docker_secret_file)
+            .unwrap()
+            .trim()
+            .to_string()
     } else {
         from_env("OSU_PP_CALC_API_KEY", None)
     }
@@ -51,7 +65,7 @@ pub fn beatmaps_cache() -> String {
 }
 
 pub fn minimal_force_interval() -> Duration {
-    Duration::from_secs(from_env("OSU_PP_CALC_FORCE_INTERVAL_SECS", Some(60*15)))
+    Duration::from_secs(from_env("OSU_PP_CALC_FORCE_INTERVAL_SECS", Some(60 * 15)))
 }
 
 fn binary_dir() -> PathBuf {
@@ -64,8 +78,8 @@ fn binary_dir() -> PathBuf {
                 exe_path.pop();
             }
             exe_path
-        },
-        Err(e) => panic!(format!("Couldn't get current path! {}", e))
+        }
+        Err(e) => panic!(format!("Couldn't get current path! {}", e)),
     }
 }
 

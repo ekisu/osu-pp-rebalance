@@ -1,21 +1,22 @@
+use super::performance_calculator::{calculate_profile, ProfileResults};
 use std::collections::HashMap;
 use std::error::Error;
-use std::sync::{Mutex, Arc};
-use std::sync::mpsc::{Sender, Receiver, channel};
-use std::thread;
-use std::thread::{JoinHandle};
-use std::time::{Duration, Instant, SystemTime};
 use std::fs::File;
 use std::io::{BufReader, BufWriter};
-use super::performance_calculator::{calculate_profile, ProfileResults};
+use std::sync::mpsc::{channel, Receiver, Sender};
+use std::sync::{Arc, Mutex};
+use std::thread;
+use std::thread::JoinHandle;
+use std::time::{Duration, Instant, SystemTime};
 
 pub struct ProfileCache {
     data: Arc<Mutex<HashMap<String, (ProfileResults, SystemTime)>>>,
 }
 
 impl ProfileCache {
-    fn load_results(results_file: String) -> 
-        Result<HashMap<String, (ProfileResults, SystemTime)>, Box<Error>> {
+    fn load_results(
+        results_file: String,
+    ) -> Result<HashMap<String, (ProfileResults, SystemTime)>, Box<Error>> {
         let file = File::open(results_file)?;
         let reader = BufReader::new(file);
 
@@ -24,9 +25,10 @@ impl ProfileCache {
         Ok(results)
     }
 
-    fn save_results(data: &HashMap<String, (ProfileResults, SystemTime)>,
-                    results_file: String) -> Result<(), Box<Error>> {
-            
+    fn save_results(
+        data: &HashMap<String, (ProfileResults, SystemTime)>,
+        results_file: String,
+    ) -> Result<(), Box<Error>> {
         let file = File::create(results_file)?;
         let writer = BufWriter::new(file);
 
@@ -46,7 +48,7 @@ impl ProfileCache {
 
             match ProfileCache::save_results(&*guard, location_clone) {
                 Ok(_) => println!("Saved results data successfully!"),
-                Err(e) => println!("Error while saving: {}", e)
+                Err(e) => println!("Error while saving: {}", e),
             };
         });
     }
@@ -66,7 +68,7 @@ impl ProfileCache {
         };
 
         ProfileCache {
-            data: Arc::new(Mutex::new(data_hm))
+            data: Arc::new(Mutex::new(data_hm)),
         }
     }
 

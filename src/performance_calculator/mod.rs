@@ -1,6 +1,6 @@
+extern crate reqwest;
 extern crate serde;
 extern crate serde_json;
-extern crate reqwest;
 
 use std::error::Error;
 use std::fmt;
@@ -21,7 +21,18 @@ macro_rules! mods {
 
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize)]
 pub enum Mod {
-    HD, HR, DT, NC, FL, NF, EZ, HT, SO, SD, PF, TD
+    HD,
+    HR,
+    DT,
+    NC,
+    FL,
+    NF,
+    EZ,
+    HT,
+    SO,
+    SD,
+    PF,
+    TD,
 }
 
 impl Mod {
@@ -40,7 +51,7 @@ impl Mod {
             SO => "so",
             SD => "sd",
             PF => "pf",
-            TD => "td"
+            TD => "td",
         }
     }
 
@@ -60,7 +71,7 @@ impl Mod {
             SO => "SO",
             SD => "SD",
             PF => "PF",
-            TD => "TD"
+            TD => "TD",
         }
     }
 }
@@ -69,7 +80,7 @@ impl Mod {
 #[serde(untagged)]
 pub enum Accuracy {
     Percentage(f64),
-    Hits { good: usize, meh: usize }
+    Hits { good: usize, meh: usize },
 }
 
 #[derive(Debug)]
@@ -86,7 +97,7 @@ pub mod profile;
 pub use profile::{calculate_profile, ProfileResults};
 
 pub mod simulate;
-pub use simulate::{simulate_play, SimulationResults, SimulationParams};
+pub use simulate::{simulate_play, SimulationParams, SimulationResults};
 
 #[cfg(test)]
 mod test {
@@ -101,7 +112,7 @@ mod test {
         mod_list.insert(Mod::HR);
         mod_list.insert(Mod::HD);
 
-        let mod_vec : Vec<_> = mod_list.into_iter().collect();
+        let mod_vec: Vec<_> = mod_list.into_iter().collect();
         assert_eq!(mod_vec, [Mod::HD, Mod::HR, Mod::DT]);
     }
 }
