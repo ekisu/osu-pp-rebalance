@@ -6,9 +6,9 @@ use std::time::Duration;
 
 /// Tries reading a value from the `key` env variable, and casts it into
 /// `T`.
-/// 
+///
 /// # Panics
-/// 
+///
 /// Will panic if the key doesn't exist, unless some `default` is provided;
 /// and if the key exists, but can't be parsed into `T`.
 fn from_env<T>(key: &'static str, default: Option<T>) -> T
@@ -42,9 +42,9 @@ where
 /// The osu! api key to be used on requests. Can be either on
 /// `/run/secrets/osu_pp_calc_api_key`, if running under Docker, or on the
 /// `OSU_PP_CALC_API_KEY` env variable.
-/// 
+///
 /// # Panics
-/// 
+///
 /// Will panic if neither `/run/secrets/osu_pp_calc_api_key` nor the
 /// `OSU_PP_CALC_API_KEY` exists.
 pub fn api_key() -> String {
@@ -97,9 +97,9 @@ pub fn minimal_force_interval() -> Duration {
 }
 
 /// The directory where the currently running executable resides.
-/// 
+///
 /// # Panics
-/// 
+///
 /// Will panic if `env::current_exe()` errors.
 fn binary_dir() -> PathBuf {
     match env::current_exe() {
@@ -116,7 +116,7 @@ fn binary_dir() -> PathBuf {
     }
 }
 
-/// The path to the osu-tools' PerformanceCalculator.dll. 
+/// The path to the osu-tools' PerformanceCalculator.dll.
 /// It should be placed on the same dir as the application binary.
 pub fn performance_calculator_path() -> String {
     let mut dir = binary_dir();

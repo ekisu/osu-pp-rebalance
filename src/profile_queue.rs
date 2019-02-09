@@ -1,8 +1,8 @@
 //! A multi-threaded job queue for profile PP calculations.
-//! 
+//!
 //! Relies on `mt_job_queue` internally, but stores the information
 //! needed for the polling-based web interface to work.
-//! 
+//!
 //! A single user name/ID can be requested multiple times, however,
 //! while in the queue, they will always be associated with a single job.
 //! This avoid unnecessary computations.
@@ -38,7 +38,7 @@ pub enum RequestStatus {
 
 impl ProfileQueue {
     /// Creates a new `ProfileQueue`, with `num_threads` workers.
-    /// 
+    ///
     /// The results will be stored into `profile_cache`.
     pub fn new(profile_cache: Arc<ProfileCache>, num_threads: usize) -> Self {
         let calculation_errors = Arc::new(Mutex::new(BTreeSet::new()));

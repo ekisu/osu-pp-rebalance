@@ -1,5 +1,5 @@
 //! A interface for PerformanceCalculator.dll's `profile` command.
-//! 
+//!
 //! The principal function of this module is `calculate_profile`, which
 //! calls into PerformanceCalculator.
 use super::{Mod, UnsuccessfulCommandError};
@@ -46,9 +46,9 @@ pub struct ProfileResults {
 }
 
 /// Parses the output from PerformanceCalculator (`raw_results`) into a ProfileResults struct.
-/// 
+///
 /// # Errors
-/// 
+///
 /// Will error if `raw_results` can't be parsed into a valid `ProfileResults`.
 fn parse_profile_results(raw_results: String) -> Result<ProfileResults, Box<Error>> {
     Ok(serde_json::from_str(raw_results.as_str())?)
