@@ -7,6 +7,8 @@ use std::fs::File;
 use std::path::PathBuf;
 use std::process::Command;
 
+/// Has miscellaneous info about a simulated play, including accuracy, combo and max combo,
+/// number of 300/100/50s and misses.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PlayInfo {
     #[serde(alias = "Accuracy")]
@@ -25,7 +27,8 @@ pub struct PlayInfo {
     miss: i64,
 }
 
-// Simulation
+/// The result of a play simulation. Contains info about the map, the simulation params,
+/// and the simulated play resulting PP.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SimulationResults {
     #[serde(alias = "BeatmapInfo")]
@@ -40,6 +43,9 @@ pub struct SimulationResults {
     pp: f64,
 }
 
+/// Information that will be used to simulate the play. Contains the play
+/// accuracy, mod combination, and optionally the maximum combo and number of
+/// misses.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SimulationParams {
     accuracy: Accuracy,
@@ -48,10 +54,14 @@ pub struct SimulationParams {
     misses: Option<usize>,
 }
 
+/// Parses the output of PerformanceCalculator's `simulate` command (contained into
+/// `raw_results`) into a SimulationResults struct.
 fn parse_simulation_results(raw_results: String) -> Result<SimulationResults, Box<Error>> {
     Ok(serde_json::from_str(raw_results.as_str())?)
 }
 
+/// Obtains the path for a beatmap's .osu file. If the beatmap isn't currently
+/// cached, downloads it and stores it into `beatmaps_cache()`.
 fn get_beatmap_file(beatmap_id: i64) -> Result<String, Box<Error>> {
     let mut osu_path: PathBuf = PathBuf::new();
     osu_path.push(beatmaps_cache());
@@ -71,6 +81,8 @@ fn get_beatmap_file(beatmap_id: i64) -> Result<String, Box<Error>> {
     Ok(osu_path.to_str().unwrap().to_string())
 }
 
+/// Simulate a play on `beatmap_id`, under the conditions specified by `params`, under the
+/// new PP system. Returns a SimulationResults on success, or a Error on error.
 pub fn simulate_play(
     beatmap_id: i64,
     params: SimulationParams,
