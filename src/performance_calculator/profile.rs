@@ -1,9 +1,14 @@
+//! A interface for PerformanceCalculator.dll's `profile` command.
+//! 
+//! The principal function of this module is `calculate_profile`, which
+//! calls into PerformanceCalculator.
 use super::{Mod, UnsuccessfulCommandError};
 use crate::config_functions::{api_key, dotnet_command, performance_calculator_path};
 use std::collections::BTreeSet;
 use std::error::Error;
 use std::process::Command;
 
+/// A single play, with both live (old) and local (new) PP results.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Score {
     #[serde(alias = "BeatmapID")]
@@ -24,6 +29,8 @@ pub struct Score {
     position_change: i64,
 }
 
+/// The result of a PP calculation for a osu! profile. Contains the list of
+/// scores (from the user actual top 100 plays), ordered by local (new) PP.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ProfileResults {
     #[serde(alias = "Username")]
@@ -38,10 +45,17 @@ pub struct ProfileResults {
     scores: Vec<Score>,
 }
 
+/// Parses the output from PerformanceCalculator (`raw_results`) into a ProfileResults struct.
+/// 
+/// # Errors
+/// 
+/// Will error if `raw_results` can't be parsed into a valid `ProfileResults`.
 fn parse_profile_results(raw_results: String) -> Result<ProfileResults, Box<Error>> {
     Ok(serde_json::from_str(raw_results.as_str())?)
 }
 
+/// Calculates the new PP system scores for a osu! user profile. `user`, preferably, should
+/// be a user id, but it can also be the user name.
 pub fn calculate_profile(user: String) -> Result<ProfileResults, Box<Error>> {
     let output = Command::new(dotnet_command())
         .arg(performance_calculator_path())

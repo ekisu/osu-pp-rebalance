@@ -1,3 +1,8 @@
+//! A interface to osu-tools' PerformanceCalculator.dll
+//! 
+//! This module contains a few data structures/enums common to both
+//! profile calculation and simulation requests. Specialized functions
+//! can be found into the `profile` and `simulate` modules.
 extern crate reqwest;
 extern crate serde;
 extern crate serde_json;
@@ -19,6 +24,7 @@ macro_rules! mods {
     }
 }
 
+/// A enum, representing all possible mods in osu!standard.
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize)]
 pub enum Mod {
     HD,
@@ -36,6 +42,8 @@ pub enum Mod {
 }
 
 impl Mod {
+    /// Obtain a string representation of the mod, suitable to pass as a mod
+    /// parameter to PerformanceCalculator.
     fn to_arg(&self) -> &'static str {
         use Mod::*;
 
@@ -55,6 +63,7 @@ impl Mod {
         }
     }
 
+    /// Obtain a human-readable representation for the mod.
     fn to_string(&self) -> &'static str {
         use Mod::*;
 
@@ -76,6 +85,10 @@ impl Mod {
     }
 }
 
+/// A data type that represents the Accuracy of a play in osu!standard.
+///
+/// Can either be a *Percentage*, or *Hits*, which contains the number of
+/// non-300s (perfect) hits of a play: good (100s) and meh (50s).
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum Accuracy {
@@ -83,6 +96,7 @@ pub enum Accuracy {
     Hits { good: usize, meh: usize },
 }
 
+/// An error that can be returned when the external command call fails.
 #[derive(Debug)]
 struct UnsuccessfulCommandError;
 impl fmt::Display for UnsuccessfulCommandError {
