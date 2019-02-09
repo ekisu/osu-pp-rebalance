@@ -1,13 +1,10 @@
-use super::performance_calculator::{calculate_profile, ProfileResults};
+use super::performance_calculator::ProfileResults;
 use std::collections::HashMap;
 use std::error::Error;
 use std::fs::File;
 use std::io::{BufReader, BufWriter};
-use std::sync::mpsc::{channel, Receiver, Sender};
 use std::sync::{Arc, Mutex};
-use std::thread;
-use std::thread::JoinHandle;
-use std::time::{Duration, Instant, SystemTime};
+use std::time::SystemTime;
 
 pub struct ProfileCache {
     data: Arc<Mutex<HashMap<String, (ProfileResults, SystemTime)>>>,
