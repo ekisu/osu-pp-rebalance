@@ -1,11 +1,11 @@
-use crate::config_functions::{dotnet_command, performance_calculator_path, beatmaps_cache};
-use super::{Mod, Accuracy, UnsuccessfulCommandError};
-use std::process::Command;
-use std::path::PathBuf;
+use super::{Accuracy, Mod, UnsuccessfulCommandError};
+use crate::config_functions::{beatmaps_cache, dotnet_command, performance_calculator_path};
+use std::collections::{BTreeSet, HashMap};
 use std::error::Error;
-use std::collections::{HashMap, BTreeSet};
 use std::fs;
 use std::fs::File;
+use std::path::PathBuf;
+use std::process::Command;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PlayInfo {
@@ -37,7 +37,7 @@ pub struct SimulationResults {
     #[serde(alias = "CategoryAttribs")]
     category_attribs: HashMap<String, f64>,
     #[serde(alias = "PP")]
-    pp: f64
+    pp: f64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -45,7 +45,7 @@ pub struct SimulationParams {
     accuracy: Accuracy,
     mods: BTreeSet<Mod>,
     combo: Option<usize>,
-    misses: Option<usize>
+    misses: Option<usize>,
 }
 
 fn parse_simulation_results(raw_results: String) -> Result<SimulationResults, Box<Error>> {
@@ -71,19 +71,26 @@ fn get_beatmap_file(beatmap_id: i64) -> Result<String, Box<Error>> {
     Ok(osu_path.to_str().unwrap().to_string())
 }
 
-pub fn simulate_play(beatmap_id: i64, params: SimulationParams) -> Result<SimulationResults, Box<Error>> {
+pub fn simulate_play(
+    beatmap_id: i64,
+    params: SimulationParams,
+) -> Result<SimulationResults, Box<Error>> {
     let mut cmd = Command::new(dotnet_command());
 
     cmd.arg(performance_calculator_path())
-       .arg("simulate")
-       .arg("osu");
-    
+        .arg("simulate")
+        .arg("osu");
+
     let beatmap = get_beatmap_file(beatmap_id)?;
     cmd.arg(beatmap);
 
     match params.accuracy {
         Accuracy::Percentage(pct) => cmd.arg("-a").arg(format!("{:.*}", 2, pct)),
-        Accuracy::Hits { good, meh } => cmd.arg("-G").arg(good.to_string()).arg("-M").arg(meh.to_string())
+        Accuracy::Hits { good, meh } => cmd
+            .arg("-G")
+            .arg(good.to_string())
+            .arg("-M")
+            .arg(meh.to_string()),
     };
 
     for m in params.mods {
@@ -101,7 +108,7 @@ pub fn simulate_play(beatmap_id: i64, params: SimulationParams) -> Result<Simula
     cmd.arg("--json");
 
     let output = cmd.output()?;
-    
+
     if output.status.success() {
         let raw = String::from_utf8_lossy(&output.stdout).to_string();
 
@@ -126,9 +133,21 @@ mod test {
 
         let data = vec![
             // Cookiezi's Freedom Dive
-            (129891, Accuracy::Percentage(99.83f64), mods![HD, HR], None, 898f64),
+            (
+                129891,
+                Accuracy::Percentage(99.83f64),
+                mods![HD, HR],
+                None,
+                898f64,
+            ),
             // Rafis' Necrofantasia
-            (1097543, Accuracy::Hits { good: 21, meh: 0 }, mods![HD, DT], Some(1627), 792f64)
+            (
+                1097543,
+                Accuracy::Hits { good: 21, meh: 0 },
+                mods![HD, DT],
+                Some(1627),
+                792f64,
+            ),
         ];
 
         for (beatmap_id, acc, mods, combo, pp) in data {
@@ -136,14 +155,14 @@ mod test {
                 accuracy: acc,
                 mods: mods,
                 combo: combo,
-                misses: None
+                misses: None,
             };
 
             match simulate_play(beatmap_id, params) {
                 Ok(result) => {
                     // who cares about decimal places
                     assert_eq!(result.pp.trunc(), pp);
-                },
+                }
                 Err(e) => {
                     panic!(format!("simulate_play failed! {}", e));
                 }

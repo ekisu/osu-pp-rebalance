@@ -1,8 +1,8 @@
-use crate::config_functions::{api_key, dotnet_command, performance_calculator_path};
 use super::{Mod, UnsuccessfulCommandError};
-use std::process::Command;
-use std::error::Error;
+use crate::config_functions::{api_key, dotnet_command, performance_calculator_path};
 use std::collections::BTreeSet;
+use std::error::Error;
+use std::process::Command;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Score {
@@ -21,7 +21,7 @@ pub struct Score {
     #[serde(alias = "PPDelta")]
     pp_change: f64,
     #[serde(alias = "PositionDelta")]
-    position_change: i64
+    position_change: i64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -35,7 +35,7 @@ pub struct ProfileResults {
     #[serde(alias = "LocalPP")]
     total_local_pp: f64,
     #[serde(alias = "DisplayPlays")]
-    scores: Vec<Score>
+    scores: Vec<Score>,
 }
 
 fn parse_profile_results(raw_results: String) -> Result<ProfileResults, Box<Error>> {
@@ -44,14 +44,14 @@ fn parse_profile_results(raw_results: String) -> Result<ProfileResults, Box<Erro
 
 pub fn calculate_profile(user: String) -> Result<ProfileResults, Box<Error>> {
     let output = Command::new(dotnet_command())
-                           .arg(performance_calculator_path())
-                           .arg("profile")
-                           .arg(user)
-                           .arg(api_key())
-                           .arg("--json")
-                           //.current_dir(Path::new(PERFORMANCE_CALCULATOR_PATH).parent().unwrap())
-                           .output()?;
-    
+        .arg(performance_calculator_path())
+        .arg("profile")
+        .arg(user)
+        .arg(api_key())
+        .arg("--json")
+        //.current_dir(Path::new(PERFORMANCE_CALCULATOR_PATH).parent().unwrap())
+        .output()?;
+
     if output.status.success() {
         let raw = String::from_utf8_lossy(&output.stdout).to_string();
 
