@@ -171,7 +171,7 @@ mod test {
                 Accuracy::Percentage(99.83f64),
                 mods![HD, HR],
                 None,
-                898f64,
+                894f64,
             ),
             // Rafis' Necrofantasia
             (
