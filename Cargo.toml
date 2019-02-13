@@ -21,3 +21,6 @@ features = ["handlebars_templates", "tera_templates", "json", "serve"]
 [dependencies.ctrlc]
 version = "*"
 features = ["termination"]
+
+[profile.release]
+lto = true
