@@ -32,6 +32,8 @@ fn main() {
 
     let target_dir = target_dir();
 
+    println!("Building PerformanceCalculator.dll");
+
     Command::new("dotnet")
         .args(&[
             "publish",
@@ -40,7 +42,21 @@ fn main() {
         ])
         .arg(if is_debug() { "Debug" } else { "Release" })
         .arg("-o")
-        .arg(fs::canonicalize(target_dir).unwrap().to_str().unwrap())
+        .arg(fs::canonicalize(target_dir.clone()).unwrap().to_str().unwrap())
+        // We don't know the system we're publishing, so linking won't work
+        .arg("/p:LinkDuringPublish=false")
+        .status()
+        .unwrap();
+
+    println!("Removing unneeded build files from PerformanceCalculator.dll");
+    
+    Command::new("dotnet")
+        .args(&[
+            "run",
+            "--project",
+            "osu-tools/RemoveBuildFiles/RemoveBuildFiles.csproj",
+        ])
+        .arg(target_dir)
         .status()
         .unwrap();
 }

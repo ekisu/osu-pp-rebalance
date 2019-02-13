@@ -24,6 +24,7 @@ RUN dotnet restore ./osu-tools/PerformanceCalculator/PerformanceCalculator.cspro
 # actually copy the code (that might have changed...)
 COPY ./osu-tools ./osu-tools
 RUN dotnet publish osu-tools/PerformanceCalculator/PerformanceCalculator.csproj -c Release -r linux-x64 -o /osu-pp-rebalance/binaries
+RUN dotnet run --project osu-tools/RemoveBuildFiles/RemoveBuildFiles.csproj /osu-pp-rebalance/binaries
 
 FROM liuchong/rustup:nightly AS build_calculator
 WORKDIR /osu-pp-rebalance
