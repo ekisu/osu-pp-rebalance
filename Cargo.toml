@@ -24,3 +24,4 @@ features = ["termination"]
 
 [profile.release]
 lto = true
+incremental = false
