@@ -18,12 +18,14 @@ WORKDIR /osu-pp-rebalance
 COPY ./osu-tools/PerformanceCalculator/PerformanceCalculator.csproj ./osu-tools/PerformanceCalculator/PerformanceCalculator.csproj
 COPY ./osu-tools/osu ./osu-tools/osu
 
+# we need this for ILLink.Tasks
+COPY ./osu-tools/PerformanceCalculator/nuget.config /root/.nuget/NuGet/NuGet.Config
 # cache osu-tools deps
 RUN dotnet restore ./osu-tools/PerformanceCalculator/PerformanceCalculator.csproj
 
 # actually copy the code (that might have changed...)
 COPY ./osu-tools ./osu-tools
-RUN dotnet publish osu-tools/PerformanceCalculator/PerformanceCalculator.csproj -c Release -r linux-x64 -o /osu-pp-rebalance/binaries
+RUN dotnet publish osu-tools/PerformanceCalculator/PerformanceCalculator.csproj -c Release -r linux-x64 -f netcoreapp2.0 -o /osu-pp-rebalance/binaries
 RUN dotnet run --project osu-tools/RemoveBuildFiles/RemoveBuildFiles.csproj /osu-pp-rebalance/binaries
 
 FROM liuchong/rustup:nightly AS build_calculator
