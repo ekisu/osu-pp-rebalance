@@ -23,6 +23,12 @@ COPY ./osu-tools/PerformanceCalculator/nuget.config /root/.nuget/NuGet/NuGet.Con
 # cache osu-tools deps
 RUN dotnet restore ./osu-tools/PerformanceCalculator/PerformanceCalculator.csproj
 
+# Workaround libunwind8 dotnet bug
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        libunwind8 \
+    && rm -rf /var/lib/apt/lists/*
+
 # actually copy the code (that might have changed...)
 COPY ./osu-tools ./osu-tools
 RUN dotnet publish osu-tools/PerformanceCalculator/PerformanceCalculator.csproj -c Release -r linux-x64 -f netcoreapp2.0 -o /osu-pp-rebalance/binaries
@@ -45,7 +51,7 @@ FROM microsoft/dotnet:2.2-runtime
 COPY --from=build_dll /osu-pp-rebalance/binaries/* /osu-pp-rebalance/
 COPY --from=build_calculator /osu-pp-rebalance/target/release/osu-pp-rebalance /osu-pp-rebalance/osu-pp-rebalance
 
-# Workaround libunwind8 dotnet bug
+# Workaround libunwind8 dotnet bug (again)
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         libunwind8 \
