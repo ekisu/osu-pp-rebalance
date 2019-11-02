@@ -165,21 +165,21 @@ mod test {
         use Mod::*;
 
         let data = vec![
-            // Cookiezi's Freedom Dive
-            (
-                129891,
-                Accuracy::Percentage(99.83f64),
-                mods![HD, HR],
-                None,
-                894f64,
-            ),
             // Rafis' Necrofantasia
             (
                 1097543,
                 Accuracy::Hits { good: 21, meh: 0 },
                 mods![HD, DT],
                 Some(1627),
-                792f64,
+                625f64,
+            ),
+            // Cookiezi's Freedom Dive
+            (
+                129891,
+                Accuracy::Hits { good: 5, meh: 0 },
+                mods![HD, HR],
+                None,
+                848f64,
             ),
         ];
 
