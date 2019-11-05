@@ -1,11 +1,11 @@
 [package]
 name = "osu-pp-rebalance"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["ekisu <ramonzitosdesorte@hotmail.com>"]
 edition = "2018"
 
 [dependencies]
-rocket = "0.4.0"
+rocket = "^0.4.2"
 serde = "1.0"
 serde_derive = "1.0"
 serde_json = "1.0"
@@ -14,7 +14,7 @@ reqwest = "0.9.9"
 mt_job_queue = { git = "https://github.com/ekisu/mt_job_queue", rev = "f031548" }
 
 [dependencies.rocket_contrib]
-version = "0.4.0"
+version = "^0.4.2"
 default-features = false
 features = ["handlebars_templates", "tera_templates", "json", "serve"]
 
